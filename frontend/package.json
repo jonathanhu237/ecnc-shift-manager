@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "ecnc-shift-manager-frontend",
   "private": true,
   "type": "module",
   "scripts": {

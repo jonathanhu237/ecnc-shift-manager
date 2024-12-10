@@ -9,3 +9,9 @@ migrate_up:
 
 migrate_down:
 	migrate -path ./migrations -database ${ECNC_SHIFT_MANAGER_DB_DSN} down ${step}
+
+migration_version:
+	migrate -path ./migrations -database ${ECNC_SHIFT_MANAGER_DB_DSN} version
+
+set_migration_version:
+	migrate -path ./migrations -database ${ECNC_SHIFT_MANAGER_DB_DSN} force ${version}

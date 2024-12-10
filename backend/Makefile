@@ -6,3 +6,6 @@ new_migration:
 
 migrate_up:
 	migrate -path ./migrations -database ${ECNC_SHIFT_MANAGER_DB_DSN} up
+
+migrate_down:
+	migrate -path ./migrations -database ${ECNC_SHIFT_MANAGER_DB_DSN} down ${step}

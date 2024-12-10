@@ -3,11 +3,14 @@ package application
 import (
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func routes() http.Handler {
-	router := httprouter.New()
+	r := chi.NewRouter()
 
-	return router
+	r.Use(middleware.Recoverer)
+
+	return r
 }

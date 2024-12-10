@@ -12,5 +12,16 @@ func (app *Application) routes() http.Handler {
 
 	r.Use(middleware.Recoverer)
 
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		app.errorResponse(w, r, http.StatusNotFound, "route does not exist")
+	})
+	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		app.errorResponse(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+	})
+
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Post("/users", app.createUserHandler)
+	})
+
 	return r
 }

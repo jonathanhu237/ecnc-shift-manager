@@ -6,11 +6,10 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/config"
 )
 
-func openDB(cfg *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("pgx", cfg.Database.DSN)
+func (app *Application) openDB() (*sql.DB, error) {
+	db, err := sql.Open("pgx", app.config.Database.DSN)
 	if err != nil {
 		return nil, err
 	}

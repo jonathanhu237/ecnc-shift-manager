@@ -29,7 +29,7 @@ func New() *Application {
 }
 
 func (app *Application) Run() {
-	db, err := openDB(app.config)
+	db, err := app.openDB()
 	if err != nil {
 		app.logger.Error(err.Error())
 		os.Exit(1)

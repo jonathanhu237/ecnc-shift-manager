@@ -42,6 +42,12 @@ func (app *Application) Run() {
 	app.logger.Info("database connection pool established")
 	app.models = models.New(db)
 
+	if err := app.selfCheck(); err != nil {
+		app.logger.Error(err.Error())
+		os.Exit(1)
+	}
+	app.logger.Info("self check completed")
+
 	app.server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", app.config.Server.Port),
 		Handler:      app.routes(),

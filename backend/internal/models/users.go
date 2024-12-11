@@ -47,6 +47,22 @@ func (m *UserModel) CheckEmailExists(email string) (bool, error) {
 	return exists, nil
 }
 
+func (m *UserModel) CheckBlackcoreExists() (bool, error) {
+	var exists bool
+	query := `
+		SELECT EXISTS (SELECT 1 FROM users WHERE role_id = (SELECT id FROM roles WHERE name = '黑心'))
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := m.DB.QueryRowContext(ctx, query).Scan(&exists); err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
 func (m *UserModel) InsertUser(user *User) error {
 	query := `
 		INSERT INTO users (username, email, password_hash, full_name, role_id)

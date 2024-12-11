@@ -4,5 +4,4 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     refresh_token_hash TEXT NOT NULL,
     issued_at TIMESTAMP DEFAULT NOW(),
     expires_at TIMESTAMP NOT NULL,
-    revoked BOOLEAN DEFAULT FALSE
 );

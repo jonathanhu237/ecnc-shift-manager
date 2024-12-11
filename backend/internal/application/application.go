@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -47,6 +48,11 @@ func (app *Application) Run() {
 		os.Exit(1)
 	}
 	app.logger.Info("self check completed")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	app.StartTokenCleaner(ctx)
+	app.logger.Info("token cleaner started")
 
 	app.server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", app.config.Server.Port),

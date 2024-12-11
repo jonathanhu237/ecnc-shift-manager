@@ -40,3 +40,16 @@ func (m *RefreshTokenModel) Insert(rft *RefreshToken) error {
 
 	return nil
 }
+
+func (m *RefreshTokenModel) DeleteExpiredTokens() error {
+	query := `DELETE FROM refresh_tokens WHERE expires_at < $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if _, err := m.DB.ExecContext(ctx, query, time.Now()); err != nil {
+		return err
+	}
+
+	return nil
+}

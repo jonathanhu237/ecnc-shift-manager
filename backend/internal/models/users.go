@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -79,4 +80,36 @@ func (m *UserModel) InsertUser(user *User) error {
 	}
 
 	return nil
+}
+
+func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
+	user := &User{Username: username}
+
+	query := `
+		SELECT u.id, u.password_hash, u.email, u.full_name, r.name 
+		FROM users u
+		INNER JOIN roles r
+		ON u.role_id = r.id
+		WHERE username = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := m.DB.QueryRowContext(ctx, query, username).Scan(
+		&user.ID,
+		&user.PasswordHash,
+		&user.Email,
+		&user.FullName,
+		&user.Role,
+	); err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return user, nil
 }

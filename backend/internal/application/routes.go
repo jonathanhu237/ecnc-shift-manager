@@ -10,6 +10,7 @@ import (
 func (app *Application) routes() http.Handler {
 	r := chi.NewRouter()
 
+	r.Use(app.loggerMiddleware)
 	r.Use(middleware.Recoverer)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {

@@ -1,4 +1,4 @@
-package config
+package application
 
 import (
 	"flag"
@@ -24,7 +24,7 @@ type Config struct {
 	JWT         JWT
 }
 
-func New() *Config {
+func readConfig() *Config {
 	cfg := &Config{}
 
 	flag.StringVar(&cfg.Environment, "environment", "development", "Application environment")

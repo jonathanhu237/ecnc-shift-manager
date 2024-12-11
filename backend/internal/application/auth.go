@@ -115,3 +115,23 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 		app.internalSeverError(w, r, err)
 	}
 }
+
+func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	cookie := &http.Cookie{
+		Name:     "__ecnc_shift_manager_refresh_token",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now().Add(-time.Hour),
+		HttpOnly: true,
+	}
+
+	if app.config.Environment == "production" {
+		cookie.SameSite = http.SameSiteStrictMode
+	}
+
+	http.SetCookie(w, cookie)
+
+	if err := app.writeJSON(w, http.StatusNoContent, nil); err != nil {
+		app.internalSeverError(w, r, err)
+	}
+}

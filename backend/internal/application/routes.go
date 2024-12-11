@@ -21,6 +21,7 @@ func (app *Application) routes() http.Handler {
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Post("/login", app.loginHandler)
 		r.Post("/users", app.createUserHandler)
 	})
 

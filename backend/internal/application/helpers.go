@@ -35,13 +35,16 @@ func (app *Application) readJSON(r *http.Request, dst any) error {
 	if err := json.NewDecoder(r.Body).Decode(dst); err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func (app *Application) writeJSON(w http.ResponseWriter, status int, data any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
+
+	if status == http.StatusNoContent {
+		return nil
+	}
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		return err

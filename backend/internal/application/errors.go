@@ -11,7 +11,7 @@ func (app *Application) logError(r *http.Request, err error) {
 	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
 }
 
-func (app *Application) errorResponse(w http.ResponseWriter, r *http.Request, status int, errorMessage any) {
+func (app *Application) errorResponse(w http.ResponseWriter, r *http.Request, status int, errorMessage string) {
 	if err := app.writeJSON(w, status, map[string]any{"error": errorMessage}); err != nil {
 		app.logError(r, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -24,11 +24,7 @@ func (app *Application) internalSeverError(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *Application) validateError(w http.ResponseWriter, r *http.Request, err error) {
-	var errors = make(map[string]string)
-
-	for _, err := range err.(validator.ValidationErrors) {
-		errors[err.Field()] = fmt.Sprintf("needs to implement '%s'", err.Tag())
-	}
-
-	app.errorResponse(w, r, http.StatusBadRequest, errors)
+	errs := err.(validator.ValidationErrors)
+	firstError := errs[0]
+	app.errorResponse(w, r, http.StatusBadRequest, fmt.Sprintf("validation for '%s' failed on '%s' tag", firstError.Field(), firstError.Tag()))
 }

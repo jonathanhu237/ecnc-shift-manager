@@ -2,5 +2,16 @@
     "cSpell.words": [
         "Blackcore",
         "ecnc"
+    ],
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "database": "ecnc_shift_manager",
+            "username": "ecnc_shift_manager",
+            "name": "ecnc_shift_manager"
+        }
     ]
 }

@@ -22,7 +22,9 @@ func (app *Application) routes() http.Handler {
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Post("/refresh_tokens", app.createRefreshTokenHandler)
+		r.Route("/refresh_tokens", func(r chi.Router) {
+			r.Post("/", app.createRefreshTokenHandler)
+		})
 	})
 
 	return r

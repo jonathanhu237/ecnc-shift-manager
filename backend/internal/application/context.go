@@ -3,8 +3,9 @@ package application
 type contextKey string
 
 type requester struct {
-	id   int64
-	role string
+	id    int64
+	role  string
+	level int
 }
 
 const (

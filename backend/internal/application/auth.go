@@ -12,7 +12,8 @@ import (
 )
 
 type CustomClaims struct {
-	Role string `json:"role"`
+	Role  string `json:"role"`
+	Level int    `json:"level"`
 	jwt.RegisteredClaims
 }
 
@@ -56,7 +57,8 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// create jwt
 	claims := CustomClaims{
-		Role: user.Role,
+		Role:  user.Role,
+		Level: user.Level,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   strconv.FormatInt(user.ID, 10),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)), // expires in 15 minutes

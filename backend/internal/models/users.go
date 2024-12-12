@@ -14,6 +14,7 @@ type User struct {
 	Email        string `json:"email"`
 	FullName     string `json:"full_name"`
 	Role         string `json:"role"`
+	Level        int    `json:"level"`
 }
 
 type UserModel struct {
@@ -86,7 +87,7 @@ func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
 	user := &User{Username: username}
 
 	query := `
-		SELECT u.id, u.password_hash, u.email, u.full_name, r.name 
+		SELECT u.id, u.password_hash, u.email, u.full_name, r.name, r.level
 		FROM users u
 		INNER JOIN roles r
 		ON u.role_id = r.id
@@ -102,6 +103,7 @@ func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
 		&user.Email,
 		&user.FullName,
 		&user.Role,
+		&user.Level,
 	); err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):

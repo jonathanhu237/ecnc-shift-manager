@@ -26,8 +26,13 @@ func (app *Application) routes() http.Handler {
 			r.Post("/login", app.loginHandler)
 			r.With(app.getUserInfoMiddleware).Post("/logout", app.logoutHandler)
 		})
-		r.Route("/users", func(r chi.Router) {
-			r.Post("/", app.createUserHandler)
+
+		r.Group(func(r chi.Router) {
+			r.Use(app.getUserInfoMiddleware)
+			r.Route("/users", func(r chi.Router) {
+				r.Use(app.authGuardMiddleware(blackcoreLevel))
+				r.Post("/", app.createUserHandler)
+			})
 		})
 	})
 

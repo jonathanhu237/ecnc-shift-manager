@@ -18,16 +18,20 @@ type CustomClaims struct {
 
 func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		Username string `json:"username" validate:"required"`
-		Password string `json:"password" validate:"required"`
+		Username string `json:"username"`
+		Password string `json:"password"`
 	}
 
 	if err := app.readJSON(r, &payload); err != nil {
-		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		app.errorResponse(w, r, app.badRequest(err.Error()))
 		return
 	}
-	if err := app.validate.Struct(payload); err != nil {
-		app.validateError(w, r, err)
+	if payload.Username == "" {
+		app.errorResponse(w, r, app.badRequest("username is required"))
+		return
+	}
+	if payload.Password == "" {
+		app.errorResponse(w, r, app.badRequest("password is required"))
 		return
 	}
 
@@ -36,7 +40,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrRecordNotFound):
-			app.errorResponse(w, r, http.StatusUnauthorized, "invalid username or password")
+			app.errorResponse(w, r, errInvalidLogin)
 		default:
 			app.internalSeverError(w, r, err)
 		}
@@ -47,7 +51,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(payload.Password)); err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
-			app.errorResponse(w, r, http.StatusUnauthorized, "invalid username or password")
+			app.errorResponse(w, r, errInvalidLogin)
 		default:
 			app.internalSeverError(w, r, err)
 		}
@@ -87,7 +91,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// insert the refresh token to database
-	if err := app.models.RefreshToken.Insert(refresh_token); err != nil {
+	if err := app.models.RefreshToken.InsertRefreshToken(refresh_token); err != nil {
 		app.internalSeverError(w, r, err)
 		return
 	}
@@ -108,25 +112,34 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	// response
-	if err := app.writeJSON(w, http.StatusOK, map[string]any{
+	app.successResponse(w, r, "login successfully", map[string]any{
 		"access_token": ss,
 		"user":         user,
-	}); err != nil {
-		app.internalSeverError(w, r, err)
-	}
+	})
 }
 
 func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	// get the requester ID
+	requester, ok := r.Context().Value(requesterCtxKey).(*requester)
+	if !ok {
+		panic("requester not found in context")
+	}
+
+	// revoke user's refresh token
+	if err := app.models.RefreshToken.RevokeUserTokens(requester.id); err != nil {
+		app.internalSeverError(w, r, err)
+		return
+	}
+
+	// remove the refresh token from the http-only cookie
 	cookie := &http.Cookie{
 		Name:    "__ecnc_shift_manager_refresh_token",
 		Value:   "",
 		Path:    "/",
 		Expires: time.Now().Add(-time.Hour),
 	}
-
 	http.SetCookie(w, cookie)
 
-	if err := app.writeJSON(w, http.StatusNoContent, nil); err != nil {
-		app.internalSeverError(w, r, err)
-	}
+	// response
+	app.successResponse(w, r, "logout successfully", nil)
 }

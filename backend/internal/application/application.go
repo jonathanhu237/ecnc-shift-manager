@@ -8,27 +8,23 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 )
 
 type Application struct {
-	config   *Config
-	logger   *slog.Logger
-	server   *http.Server
-	models   *models.Models
-	validate *validator.Validate
+	config *Config
+	logger *slog.Logger
+	server *http.Server
+	models *models.Models
 }
 
 func New() *Application {
 	cfg := readConfig()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	return &Application{
-		config:   cfg,
-		logger:   logger,
-		validate: validate,
+		config: cfg,
+		logger: logger,
 	}
 }
 

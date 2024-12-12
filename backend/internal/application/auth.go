@@ -117,15 +117,10 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
-		Name:     "__ecnc_shift_manager_refresh_token",
-		Value:    "",
-		Path:     "/",
-		Expires:  time.Now().Add(-time.Hour),
-		HttpOnly: true,
-	}
-
-	if app.config.Environment == "production" {
-		cookie.SameSite = http.SameSiteStrictMode
+		Name:    "__ecnc_shift_manager_refresh_token",
+		Value:   "",
+		Path:    "/",
+		Expires: time.Now().Add(-time.Hour),
 	}
 
 	http.SetCookie(w, cookie)

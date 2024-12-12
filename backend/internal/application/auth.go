@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -57,7 +58,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	claims := CustomClaims{
 		Role: user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   user.Username,
+			Subject:   strconv.FormatInt(user.ID, 10),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)), // expires in 15 minutes
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},

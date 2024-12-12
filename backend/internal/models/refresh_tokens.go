@@ -19,7 +19,7 @@ type RefreshTokenModel struct {
 	DB *sql.DB
 }
 
-func (m *RefreshTokenModel) Insert(rft *RefreshToken) error {
+func (m *RefreshTokenModel) InsertRefreshToken(rft *RefreshToken) error {
 	query := `
 		INSERT INTO refresh_tokens (user_id, refresh_token_hash, expires_at) 
 		VALUES ($1, $2, $3)

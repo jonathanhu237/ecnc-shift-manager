@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	math_rand "math/rand"
 	"net/http"
 	"time"
 
@@ -114,4 +115,13 @@ func (app *Application) generateRefreshToken() (string, error) {
 func (app *Application) hashRefreshToken(token string) string {
 	hash := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(hash[:])
+}
+
+func (app *Application) generateRandomPassword(length int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*")
+	random_password := make([]rune, length)
+	for i := range random_password {
+		random_password[i] = letters[math_rand.Intn(len(letters))]
+	}
+	return string(random_password)
 }

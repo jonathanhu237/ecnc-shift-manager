@@ -67,10 +67,33 @@ func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), requesterCtxKey, &requester{
-			id:   requesterID,
-			role: claims.Role,
+			id:    requesterID,
+			role:  claims.Role,
+			level: claims.Level,
 		})
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+var (
+	blackcoreLevel = 3
+)
+
+func (app *Application) authGuardMiddleware(levelRequired int) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requester, ok := r.Context().Value(requesterCtxKey).(*requester)
+			if !ok {
+				panic("requester not found in context")
+			}
+
+			if requester.level < levelRequired {
+				app.errorResponse(w, r, errForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }

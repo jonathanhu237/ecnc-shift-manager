@@ -18,20 +18,16 @@ type CustomClaims struct {
 
 func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
+		Username string `json:"username" validate:"required"`
+		Password string `json:"password" validate:"required"`
 	}
 
 	if err := app.readJSON(r, &payload); err != nil {
 		app.errorResponse(w, r, app.badRequest(err.Error()))
 		return
 	}
-	if payload.Username == "" {
-		app.errorResponse(w, r, app.badRequest("username is required"))
-		return
-	}
-	if payload.Password == "" {
-		app.errorResponse(w, r, app.badRequest("password is required"))
+	if err := app.validate.Struct(payload); err != nil {
+		app.validateError(w, r, err)
 		return
 	}
 

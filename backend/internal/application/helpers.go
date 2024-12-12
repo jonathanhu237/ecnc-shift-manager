@@ -52,3 +52,34 @@ func (app *Application) writeJSON(w http.ResponseWriter, status int, data any) e
 
 	return nil
 }
+
+type response struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    any    `json:"data"`
+}
+
+func (app *Application) successResponse(w http.ResponseWriter, message string, data any) error {
+	return app.writeJSON(w, http.StatusOK, response{
+		Code:    0,
+		Message: message,
+		Data:    data,
+	})
+}
+
+func (app *Application) errorResponse(w http.ResponseWriter, code int, message string) error {
+	return app.writeJSON(w, http.StatusOK, response{
+		Code:    code,
+		Message: message,
+		Data:    nil,
+	})
+}
+
+func (app *Application) logError(r *http.Request, err error) {
+	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
+}
+
+func (app *Application) internalSeverError(w http.ResponseWriter, r *http.Request, err error) {
+	app.logError(r, err)
+	app.errorResponse(w, http.StatusInternalServerError, "internal server error")
+}

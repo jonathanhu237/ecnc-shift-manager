@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -15,10 +14,10 @@ func (app *Application) routes() http.Handler {
 	r.Use(middleware.Recoverer)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		app.notFound(w, r, errors.New("route does not exist"))
+		app.errorResponse(w, http.StatusNotFound, "route does not exist")
 	})
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		app.methodNotAllowed(w, r)
+		app.errorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {

@@ -17,14 +17,13 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := app.readJSON(r, &payload); err != nil {
-		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		app.badRequest(w, r, err)
 		return
 	}
 	if err := app.validate.Struct(payload); err != nil {
 		app.validateError(w, r, err)
 		return
 	}
-
 	// check if username and email already exists
 	userExists, err := app.models.Users.CheckUserExists(payload.Username)
 	if err != nil {
@@ -32,7 +31,7 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	if userExists {
-		app.errorResponse(w, r, http.StatusConflict, "username already exists")
+		app.errorResponse(w, r, errUsernameExistsInCreateUser)
 		return
 	}
 
@@ -42,7 +41,7 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	if emailExists {
-		app.errorResponse(w, r, http.StatusConflict, "email already exists")
+		app.errorResponse(w, r, errEmailExistsInCreateUser)
 		return
 	}
 
@@ -69,7 +68,5 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// return a success message
-	if err := app.writeJSON(w, http.StatusCreated, user); err != nil {
-		app.internalSeverError(w, r, err)
-	}
+	app.successResponse(w, r, "user created successfully", user)
 }

@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -81,4 +83,10 @@ func (app *Application) errorResponse(w http.ResponseWriter, r *http.Request, er
 func (app *Application) internalSeverError(w http.ResponseWriter, r *http.Request, err error) {
 	app.logError(r, err)
 	app.errorResponse(w, r, errInternalServer)
+}
+
+func (app *Application) validateError(w http.ResponseWriter, r *http.Request, err error) {
+	errors := err.(validator.ValidationErrors)
+	message := fmt.Sprintf("validator for '%s' failed on the '%s'", errors[0].Field(), errors[0].Tag())
+	app.errorResponse(w, r, app.badRequest(message))
 }

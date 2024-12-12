@@ -43,3 +43,7 @@ func (app *Application) notFound(w http.ResponseWriter, r *http.Request, err err
 func (app *Application) methodNotAllowed(w http.ResponseWriter, r *http.Request) {
 	app.errorResponse(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 }
+
+func (app *Application) unauthorized(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, http.StatusUnauthorized, err.Error())
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -80,13 +81,17 @@ func (app *Application) errorResponse(w http.ResponseWriter, r *http.Request, er
 	})
 }
 
+func (app *Application) badRequest(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, appError{code: http.StatusBadRequest, message: err.Error()})
+}
+
 func (app *Application) internalSeverError(w http.ResponseWriter, r *http.Request, err error) {
 	app.logError(r, err)
 	app.errorResponse(w, r, errInternalServer)
 }
 
 func (app *Application) validateError(w http.ResponseWriter, r *http.Request, err error) {
-	errors := err.(validator.ValidationErrors)
-	message := fmt.Sprintf("validator for '%s' failed on the '%s'", errors[0].Field(), errors[0].Tag())
-	app.errorResponse(w, r, app.badRequest(message))
+	errs := err.(validator.ValidationErrors)
+	message := fmt.Sprintf("validator for '%s' failed on the '%s'", errs[0].Field(), errs[0].Tag())
+	app.badRequest(w, r, errors.New(message))
 }

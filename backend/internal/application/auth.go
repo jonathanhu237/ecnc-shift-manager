@@ -23,7 +23,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := app.readJSON(r, &payload); err != nil {
-		app.errorResponse(w, r, app.badRequest(err.Error()))
+		app.badRequest(w, r, err)
 		return
 	}
 	if err := app.validate.Struct(payload); err != nil {

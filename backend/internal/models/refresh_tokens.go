@@ -12,6 +12,7 @@ type RefreshToken struct {
 	RefreshTokenHash string
 	IssuedAt         time.Time
 	ExpiresAt        time.Time
+	Revoked          bool
 }
 
 type RefreshTokenModel struct {
@@ -41,13 +42,34 @@ func (m *RefreshTokenModel) Insert(rft *RefreshToken) error {
 	return nil
 }
 
-func (m *RefreshTokenModel) DeleteExpiredTokens() error {
-	query := `DELETE FROM refresh_tokens WHERE expires_at < $1`
+func (m *RefreshTokenModel) RevokeUserTokens(userID int64) error {
+	query := `
+		UPDATE refresh_tokens 
+		SET revoked = true 
+		WHERE user_id = $1
+	`
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if _, err := m.DB.ExecContext(ctx, query, time.Now()); err != nil {
+	if _, err := m.DB.ExecContext(ctx, query, userID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RefreshTokenModel) DeleteExpiredTokens() error {
+	query := `
+        DELETE FROM refresh_tokens 
+        WHERE expires_at < CURRENT_TIMESTAMP 
+		OR revoked = true
+    `
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if _, err := m.DB.ExecContext(ctx, query); err != nil {
 		return err
 	}
 

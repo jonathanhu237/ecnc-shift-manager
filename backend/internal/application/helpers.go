@@ -38,19 +38,22 @@ func (app *Application) readJSON(r *http.Request, dst any) error {
 	return nil
 }
 
-func (app *Application) writeJSON(w http.ResponseWriter, status int, data any) error {
+func (app *Application) logError(r *http.Request, err error) {
+	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
+}
+
+func (app *Application) writeJSON(w http.ResponseWriter, r *http.Request, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
 	if status == http.StatusNoContent {
-		return nil
+		return
 	}
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		return err
+		app.logError(r, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
-
-	return nil
 }
 
 type response struct {
@@ -59,27 +62,23 @@ type response struct {
 	Data    any    `json:"data"`
 }
 
-func (app *Application) successResponse(w http.ResponseWriter, message string, data any) error {
-	return app.writeJSON(w, http.StatusOK, response{
+func (app *Application) successResponse(w http.ResponseWriter, r *http.Request, message string, data any) {
+	app.writeJSON(w, r, http.StatusOK, response{
 		Code:    0,
 		Message: message,
 		Data:    data,
 	})
 }
 
-func (app *Application) errorResponse(w http.ResponseWriter, code int, message string) error {
-	return app.writeJSON(w, http.StatusOK, response{
-		Code:    code,
-		Message: message,
+func (app *Application) errorResponse(w http.ResponseWriter, r *http.Request, err appError) {
+	app.writeJSON(w, r, http.StatusOK, response{
+		Code:    err.code,
+		Message: err.message,
 		Data:    nil,
 	})
 }
 
-func (app *Application) logError(r *http.Request, err error) {
-	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
-}
-
 func (app *Application) internalSeverError(w http.ResponseWriter, r *http.Request, err error) {
 	app.logError(r, err)
-	app.errorResponse(w, http.StatusInternalServerError, "internal server error")
+	app.errorResponse(w, r, errInternalServer)
 }

@@ -6,6 +6,7 @@ type appError struct {
 }
 
 var (
+	errForbidden                  = appError{code: 403, message: "forbidden"}
 	errMethodNotAllowed           = appError{code: 405, message: "method not allowed"}
 	errInternalServer             = appError{code: 500, message: "internal server error"}
 	errInvalidLogin               = appError{code: 1001, message: "invalid username or password"}

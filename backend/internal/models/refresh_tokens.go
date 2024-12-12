@@ -75,3 +75,26 @@ func (m *RefreshTokenModel) DeleteExpiredTokens() error {
 
 	return nil
 }
+
+func (m *RefreshTokenModel) CheckRefreshTokenValidity(userID int64, refreshTokenHash string) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1 FROM refresh_tokens
+			WHERE user_id = $1
+			AND refresh_token_hash = $2
+			AND expires_at > CURRENT_TIMESTAMP
+			AND revoked = false
+		)
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var exists bool
+
+	if err := m.DB.QueryRowContext(ctx, query, userID, refreshTokenHash).Scan(&exists); err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}

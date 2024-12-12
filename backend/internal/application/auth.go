@@ -141,3 +141,61 @@ func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	// response
 	app.successResponse(w, r, "logout successfully", nil)
 }
+
+func (app *Application) refreshAccessTokenHandler(w http.ResponseWriter, r *http.Request) {
+	// get the refresh token from the http-only cookie
+	cookie, err := r.Cookie("__ecnc_shift_manager_refresh_token")
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			app.errorResponse(w, r, errUnauthorized)
+		default:
+			app.internalSeverError(w, r, err)
+		}
+		return
+	}
+
+	// extract the refresh token and calculate the sha256sum
+	refresh_token := cookie.Value
+	refresh_token_hash := app.hashRefreshToken(refresh_token)
+
+	// extract the requester
+	requester, ok := r.Context().Value(requesterCtxKey).(*requester)
+	if !ok {
+		app.internalSeverError(w, r, errors.New("requester not found in context"))
+		return
+	}
+
+	// check refresh token validity
+	exists, err := app.models.RefreshToken.CheckRefreshTokenValidity(requester.id, refresh_token_hash)
+	if err != nil {
+		app.internalSeverError(w, r, err)
+		return
+	}
+	if !exists {
+		app.errorResponse(w, r, errInvalidRefreshToken)
+		return
+	}
+
+	// create a new access token
+	claims := CustomClaims{
+		Role:  requester.role,
+		Level: requester.level,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   strconv.FormatInt(requester.id, 10),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)), // expires in 15 minutes
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString([]byte(app.config.JWT.Secret))
+	if err != nil {
+		app.internalSeverError(w, r, err)
+		return
+	}
+
+	app.successResponse(w, r, "refresh access token successfully", map[string]any{
+		"access_token": ss,
+	})
+}

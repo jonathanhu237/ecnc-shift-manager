@@ -6,6 +6,7 @@ type appError struct {
 }
 
 var (
+	errUnauthorized               = appError{code: 401, message: "unauthorized"}
 	errForbidden                  = appError{code: 403, message: "forbidden"}
 	errMethodNotAllowed           = appError{code: 405, message: "method not allowed"}
 	errInternalServer             = appError{code: 500, message: "internal server error"}
@@ -16,4 +17,5 @@ var (
 	errInvalidToken               = appError{code: 2004, message: "invalid token"}
 	errUsernameExistsInCreateUser = appError{code: 3001, message: "username already exists"}
 	errEmailExistsInCreateUser    = appError{code: 3002, message: "email already exists"}
+	errInvalidRefreshToken        = appError{code: 4001, message: "invalid refresh token"}
 )

@@ -1,10 +1,25 @@
 package application
 
-import "github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
+import (
+	"errors"
+
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
+)
 
 func (app *Application) selfCheck() error {
+	if err := app.checkConfig(); err != nil {
+		return err
+	}
 	if err := app.checkBlackcoreExists(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (app *Application) checkConfig() error {
+	if app.config.JWT.Secret == "" {
+		return errors.New("JWT secret is not set")
 	}
 
 	return nil

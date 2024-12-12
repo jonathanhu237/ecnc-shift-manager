@@ -14,15 +14,16 @@ func (app *Application) routes() http.Handler {
 	r.Use(middleware.Recoverer)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		app.errorResponse(w, http.StatusNotFound, "route does not exist")
+		app.errorResponse(w, r, app.badRequest("route does not exist"))
 	})
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		app.errorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
+		app.errorResponse(w, r, errMethodNotAllowed)
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Route("/refresh_tokens", func(r chi.Router) {
-			r.Post("/", app.createRefreshTokenHandler)
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/login", app.loginHandler)
+			r.With(app.getUserInfoMiddleware).Post("/logout", app.logoutHandler)
 		})
 	})
 

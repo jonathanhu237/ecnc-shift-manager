@@ -82,7 +82,6 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	refresh_token := &models.RefreshToken{
 		UserID:           user.ID,
 		RefreshTokenHash: app.hashRefreshToken(refresh_token_string),
-		IssuedAt:         time.Now(),
 		ExpiresAt:        refreshTokenExpiresAt,
 	}
 

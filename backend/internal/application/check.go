@@ -23,6 +23,12 @@ func (app *Application) checkConfig() error {
 	if app.config.JWT.Secret == "" {
 		return errors.New("JWT secret is not set")
 	}
+	if app.config.Email.Address == "" {
+		return errors.New("Email sender address is not set")
+	}
+	if app.config.Email.Password == "" {
+		return errors.New("Email sender password is not set")
+	}
 
 	return nil
 }

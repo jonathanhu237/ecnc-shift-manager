@@ -67,7 +67,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte(app.config.JWT.Secret))
+	ss, err := token.SignedString([]byte(app.config.JWTSecret))
 	if err != nil {
 		app.internalSeverError(w, r, err)
 		return
@@ -189,7 +189,7 @@ func (app *Application) refreshAccessTokenHandler(w http.ResponseWriter, r *http
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte(app.config.JWT.Secret))
+	ss, err := token.SignedString([]byte(app.config.JWTSecret))
 	if err != nil {
 		app.internalSeverError(w, r, err)
 		return

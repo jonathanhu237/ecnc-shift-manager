@@ -19,7 +19,7 @@ import (
 )
 
 func (app *Application) openDB() (*sql.DB, error) {
-	db, err := sql.Open("pgx", app.config.Database.DSN)
+	db, err := sql.Open("pgx", fmt.Sprintf("postgres://postgres:%s@localhost:5432/ecnc_shift_manager_db?sslmode=disable", app.config.PostgresPassword))
 	if err != nil {
 		return nil, err
 	}

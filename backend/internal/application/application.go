@@ -23,18 +23,24 @@ type Application struct {
 }
 
 func New() *Application {
-	cfg := readConfig()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	return &Application{
-		config:   cfg,
 		logger:   logger,
 		validate: validate,
 	}
 }
 
 func (app *Application) Run() {
+	// Read config
+	cfg, err := app.readConfig()
+	if err != nil {
+		app.logger.Error(err.Error())
+		os.Exit(1)
+	}
+	app.config = cfg
+
 	// Establish database connection
 	db, err := app.openDB()
 	if err != nil {
@@ -64,8 +70,8 @@ func (app *Application) Run() {
 		mail.WithPort(465),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain),
 		mail.WithSSL(),
-		mail.WithUsername(app.config.Email.Address),
-		mail.WithPassword(app.config.Email.Password),
+		mail.WithUsername(app.config.MailClientAddress),
+		mail.WithPassword(app.config.MailClientPassword),
 	)
 	if err != nil {
 		app.logger.Error(err.Error())
@@ -84,7 +90,7 @@ func (app *Application) Run() {
 
 	// Start the server
 	app.server = &http.Server{
-		Addr:         fmt.Sprintf(":%d", app.config.Server.Port),
+		Addr:         fmt.Sprintf(":%d", app.config.Port),
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,

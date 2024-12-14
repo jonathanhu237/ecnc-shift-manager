@@ -1,45 +1,94 @@
 package application
 
 import (
-	"flag"
+	"fmt"
+	"log/slog"
 	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
-type Server struct {
-	Port int
-}
-
-type Database struct {
-	DSN string
-}
-
-type JWT struct {
-	Secret string
-}
-
-type Email struct {
-	Address  string
-	Password string
-}
-
 type Config struct {
-	Environment string
-	Server      Server
-	Database    Database
-	JWT         JWT
-	Email       Email
+	Environment        string
+	Port               int
+	PostgresPassword   string
+	JWTSecret          string
+	MailClientAddress  string
+	MailClientPassword string
 }
 
-func readConfig() *Config {
+func (app *Application) readConfig() (*Config, error) {
+	if err := godotenv.Load("../.env"); err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{}
 
-	flag.StringVar(&cfg.Environment, "environment", "development", "Application environment")
-	flag.IntVar(&cfg.Server.Port, "port", 8080, "API server port")
-	flag.StringVar(&cfg.Database.DSN, "db-dsn", os.Getenv("ECNC_SHIFT_MANAGER_DB_DSN"), "PostgreSQL DSN")
-	flag.StringVar(&cfg.JWT.Secret, "jwt-secret", os.Getenv("ECNC_SHIFT_MANAGER_JWT_SECRET"), "JWT secret key")
-	flag.StringVar(&cfg.Email.Address, "email-sender", os.Getenv("ECNC_SHIFT_MANAGER_EMAIL_ADDRESS"), "Email sender address")
-	flag.StringVar(&cfg.Email.Password, "email-sender-password", os.Getenv("ECNC_SHIFT_MANAGER_EMAIL_PASSWORD"), "Email sender password")
-	flag.Parse()
+	cfg.Environment = app.readOptionalStringEnv("ENVIRONMENT", "development")
+	cfg.Port = app.readOptionalIntEnv("SERVER_PORT", 8080)
 
-	return cfg
+	postgresPassword, err := app.readRequiredStringEnv("POSTGRES_PASSWORD")
+	if err != nil {
+		return nil, err
+	}
+	cfg.PostgresPassword = postgresPassword
+
+	jwtSecret, err := app.readRequiredStringEnv("JWT_SECRET")
+	if err != nil {
+		return nil, err
+	}
+	cfg.JWTSecret = jwtSecret
+
+	mailClientAddress, err := app.readRequiredStringEnv("MAIL_CLIENT_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+	cfg.MailClientAddress = mailClientAddress
+
+	mailClientPassword, err := app.readRequiredStringEnv("MAIL_CLIENT_PASSWORD")
+	if err != nil {
+		return nil, err
+	}
+	cfg.MailClientPassword = mailClientPassword
+
+	return cfg, nil
+}
+
+func (app *Application) readOptionalStringEnv(key, defaultValue string) string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return defaultValue
+	}
+
+	return val
+}
+
+func (app *Application) readOptionalIntEnv(key string, defaultValue int) int {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return defaultValue
+	}
+
+	intVal, err := strconv.Atoi(val)
+	if err != nil {
+		app.logger.Warn(
+			"failed to parse environment variable, use default value",
+			slog.String("key", key),
+			slog.String("value", val),
+			slog.Int("default_value", defaultValue),
+		)
+		return defaultValue
+	}
+
+	return intVal
+}
+
+func (app *Application) readRequiredStringEnv(key string) (string, error) {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return "", fmt.Errorf("environment %s is not set", key)
+	}
+
+	return val, nil
 }

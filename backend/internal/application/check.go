@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"log/slog"
 
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
@@ -9,25 +8,8 @@ import (
 )
 
 func (app *Application) selfCheck() error {
-	if err := app.checkConfig(); err != nil {
-		return err
-	}
 	if err := app.checkBlackcoreExists(); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (app *Application) checkConfig() error {
-	if app.config.JWT.Secret == "" {
-		return errors.New("JWT secret is not set")
-	}
-	if app.config.Email.Address == "" {
-		return errors.New("Email sender address is not set")
-	}
-	if app.config.Email.Password == "" {
-		return errors.New("Email sender password is not set")
 	}
 
 	return nil

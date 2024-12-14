@@ -52,7 +52,7 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 
 	// send the username and password to the e-mail
 	message := mail.NewMsg()
-	if err := message.From(app.config.Email.Address); err != nil {
+	if err := message.From(app.config.MailClientAddress); err != nil {
 		app.internalSeverError(w, r, err)
 		return
 	}

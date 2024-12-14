@@ -48,7 +48,7 @@ func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
 		// parse the token
 		claims := &CustomClaims{}
 		_, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-			return []byte(app.config.JWT.Secret), nil
+			return []byte(app.config.JWTSecret), nil
 		})
 		if err != nil {
 			switch {

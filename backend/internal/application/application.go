@@ -10,17 +10,17 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
-	"github.com/wneessen/go-mail"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Application struct {
-	config     *Config
-	logger     *slog.Logger
-	validate   *validator.Validate
-	server     *http.Server
-	models     *models.Models
-	mailClient *mail.Client
+	config    *Config
+	logger    *slog.Logger
+	validate  *validator.Validate
+	server    *http.Server
+	models    *models.Models
+	emailChan *amqp.Channel
 }
 
 func New() *Application {
@@ -59,34 +59,41 @@ func (app *Application) Run() {
 	}
 	app.logger.Info("self check completed")
 
-	// Start token cleaner
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	app.StartTokenCleaner(ctx)
-	app.logger.Info("token cleaner started")
+	// establish rabbitmq mail producer
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://rabbitmq:%s@localhost:5672/", app.config.RabbitMQPassword))
+	if err != nil {
+		app.logger.Error(err.Error())
+		os.Exit(1)
+	}
+	defer conn.Close()
 
-	// Establish email client
-	app.mailClient, err = mail.NewClient(
-		"smtp.feishu.cn",
-		mail.WithPort(465),
-		mail.WithSMTPAuth(mail.SMTPAuthPlain),
-		mail.WithSSL(),
-		mail.WithUsername(app.config.MailClientAddress),
-		mail.WithPassword(app.config.MailClientPassword),
-	)
+	ch, err := conn.Channel()
+	if err != nil {
+		app.logger.Error(err.Error())
+		os.Exit(1)
+	}
+	defer ch.Close()
+	app.emailChan = ch
+
+	_, err = ch.QueueDeclare("mail_queue", true, false, false, false, nil)
 	if err != nil {
 		app.logger.Error(err.Error())
 		os.Exit(1)
 	}
 
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	// context for graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := app.mailClient.DialWithContext(ctx); err != nil {
-		app.logger.Error(err.Error())
+	// Start token cleaner
+	app.StartTokenCleaner(ctx)
+	app.logger.Info("token cleaner started")
+
+	// Start the mail sender
+	if err := app.StartMailSender(ctx, ch); err != nil {
+		app.logger.Error("failed to start the mail sender", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-
 	app.logger.Info("email client established")
 
 	// Start the server

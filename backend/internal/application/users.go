@@ -1,10 +1,14 @@
 package application
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/wneessen/go-mail"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -61,9 +65,30 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	message.Subject("ECNC 假勤系统 - 您的账号信息")
-	message.SetBodyString(mail.TypeTextPlain, fmt.Sprintf("用户名: %s, 密码: %s", payload.Username, random_password))
-	if err := app.mailClient.Send(message); err != nil {
+	mailPayload := MailPayload{
+		To:      payload.Email,
+		Subject: "ECNC 假勤系统 - 您的账号信息",
+		Body:    fmt.Sprintf("用户名: %s, 密码: %s", payload.Username, random_password),
+	}
+	jsonData, err := json.Marshal(mailPayload)
+	if err != nil {
+		app.internalSeverError(w, r, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := app.emailChan.PublishWithContext(
+		ctx,
+		"",
+		"mail_queue",
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        jsonData,
+		},
+	); err != nil {
 		app.internalSeverError(w, r, err)
 		return
 	}

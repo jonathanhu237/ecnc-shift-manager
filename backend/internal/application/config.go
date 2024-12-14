@@ -14,8 +14,10 @@ type Config struct {
 	Port               int
 	PostgresPassword   string
 	JWTSecret          string
+	MailClientSMTPHost string
 	MailClientAddress  string
 	MailClientPassword string
+	RabbitMQPassword   string
 }
 
 func (app *Application) readConfig() (*Config, error) {
@@ -40,6 +42,13 @@ func (app *Application) readConfig() (*Config, error) {
 	}
 	cfg.JWTSecret = jwtSecret
 
+	// mail client
+	mailClientSMTPHost, err := app.readRequiredStringEnv("MAIL_CLIENT_SMTP_HOST")
+	if err != nil {
+		return nil, err
+	}
+	cfg.MailClientSMTPHost = mailClientSMTPHost
+
 	mailClientAddress, err := app.readRequiredStringEnv("MAIL_CLIENT_ADDRESS")
 	if err != nil {
 		return nil, err
@@ -51,6 +60,13 @@ func (app *Application) readConfig() (*Config, error) {
 		return nil, err
 	}
 	cfg.MailClientPassword = mailClientPassword
+
+	// rabbitmq
+	rabbitMQPassword, err := app.readRequiredStringEnv("RABBITMQ_PASSWORD")
+	if err != nil {
+		return nil, err
+	}
+	cfg.RabbitMQPassword = rabbitMQPassword
 
 	return cfg, nil
 }

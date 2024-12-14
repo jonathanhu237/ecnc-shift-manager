@@ -67,9 +67,10 @@ func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), requesterCtxKey, &requester{
-			id:    requesterID,
-			role:  claims.Role,
-			level: claims.Level,
+			id:       requesterID,
+			username: claims.Username,
+			role:     claims.Role,
+			level:    claims.Level,
 		})
 
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -96,4 +97,23 @@ func (app *Application) authGuardMiddleware(levelRequired int) func(http.Handler
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func (app *Application) myInfoMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requester, ok := r.Context().Value(requesterCtxKey).(*requester)
+		if !ok {
+			panic("myInfoMiddleware should be used after getUserInfoMiddleware")
+		}
+
+		details, err := app.models.Users.SelectUserByUsername(requester.username)
+		if err != nil {
+			app.internalSeverError(w, r, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), requesterDetailsKey, details)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }

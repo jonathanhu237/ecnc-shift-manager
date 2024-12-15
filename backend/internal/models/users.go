@@ -116,6 +116,39 @@ func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
 	return user, nil
 }
 
+func (m *UserModel) SelectUserByID(userID int64) (*User, error) {
+	user := &User{ID: userID}
+
+	query := `
+		SELECT u.username, u.password_hash, u.email, u.full_name, r.name, r.level
+		FROM users AS u
+		INNER JOIN roles AS r
+		ON u.role_id = r.id
+		WHERE u.id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := m.DB.QueryRowContext(ctx, query, userID).Scan(
+		&user.Username,
+		&user.PasswordHash,
+		&user.Email,
+		&user.FullName,
+		&user.Role,
+		&user.Level,
+	); err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return user, nil
+}
+
 func (m *UserModel) UpdateUser(user *User) error {
 	query := `
 		UPDATE users

@@ -8,6 +8,7 @@ type appError struct {
 var (
 	errUnauthorized     = appError{code: 401, message: "unauthorized"}
 	errForbidden        = appError{code: 403, message: "forbidden"}
+	errNotFound         = appError{code: 404, message: "not found"}
 	errMethodNotAllowed = appError{code: 405, message: "method not allowed"}
 	errInternalServer   = appError{code: 500, message: "internal server error"}
 

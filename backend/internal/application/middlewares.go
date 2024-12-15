@@ -5,8 +5,10 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 )
@@ -94,4 +96,31 @@ func (app *Application) authGuardMiddleware(levelRequired int) func(http.Handler
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func (app *Application) getUserMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userIDParam := chi.URLParam(r, "userID")
+
+		userID, err := strconv.ParseInt(userIDParam, 10, 64)
+		if err != nil {
+			app.badRequest(w, r, err)
+			return
+		}
+
+		user, err := app.models.Users.SelectUserByID(userID)
+		if err != nil {
+			switch {
+			case errors.Is(err, models.ErrRecordNotFound):
+				app.errorResponse(w, r, errNotFound)
+			default:
+				app.internalSeverError(w, r, err)
+			}
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), userCtxKey, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+
 }

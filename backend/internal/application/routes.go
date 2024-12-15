@@ -33,6 +33,10 @@ func (app *Application) routes() http.Handler {
 				r.Use(app.authGuardMiddleware(blackcoreLevel))
 				r.Post("/", app.createUserHandler)
 				r.Get("/", app.getUsersHandler)
+				r.Route("/{userID}", func(r chi.Router) {
+					r.Use(app.getUserMiddleware)
+					r.Get("/", app.getUserHandler)
+				})
 			})
 			r.Route("/me", func(r chi.Router) {
 				r.Get("/", app.getMyInfoHandler)

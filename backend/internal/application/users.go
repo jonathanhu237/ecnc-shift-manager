@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -127,4 +128,14 @@ func (app *Application) getUsersHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	app.successResponse(w, r, "get users successfully", users)
+}
+
+func (app *Application) getUserHandler(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value(userCtxKey).(*models.User)
+	if !ok {
+		app.internalSeverError(w, r, errors.New("getUserHandler must be used after getUserMiddleware"))
+		return
+	}
+
+	app.successResponse(w, r, "get user successfully", user)
 }

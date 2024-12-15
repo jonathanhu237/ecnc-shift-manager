@@ -231,3 +231,26 @@ func (m *UserModel) SelectUsers() ([]*User, error) {
 
 	return users, nil
 }
+
+func (m *UserModel) DeleteUser(userID int64) error {
+	query := `DELETE FROM users WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, err := m.DB.ExecContext(ctx, query, userID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return ErrRecordNotFound
+	}
+
+	return nil
+}

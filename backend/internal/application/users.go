@@ -167,3 +167,18 @@ func (app *Application) updateUserRoleHandler(w http.ResponseWriter, r *http.Req
 
 	app.successResponse(w, r, "user updated successfully", user)
 }
+
+func (app *Application) deleteUser(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value(userCtxKey).(*models.User)
+	if !ok {
+		app.internalSeverError(w, r, errors.New("getUserHandler must be used after getUserMiddleware"))
+		return
+	}
+
+	if err := app.models.Users.DeleteUser(user.ID); err != nil {
+		app.internalSeverError(w, r, err)
+		return
+	}
+
+	app.successResponse(w, r, "user deleted successfully", nil)
+}

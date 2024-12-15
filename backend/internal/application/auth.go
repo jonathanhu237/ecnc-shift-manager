@@ -3,20 +3,12 @@ package application
 import (
 	"errors"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type CustomClaims struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
-	Level    int    `json:"level"`
-	jwt.RegisteredClaims
-}
 
 func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
@@ -59,15 +51,10 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	// create jwt
 	expiresAt := time.Now().Add(24 * time.Hour) // expires in one day
 
-	claims := CustomClaims{
-		Username: payload.Username,
-		Role:     user.Role,
-		Level:    user.Level,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   strconv.FormatInt(user.ID, 10),
-			ExpiresAt: jwt.NewNumericDate(expiresAt),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
+	claims := jwt.RegisteredClaims{
+		Subject:   user.Username,
+		ExpiresAt: jwt.NewNumericDate(expiresAt),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -93,10 +80,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	// response
-	app.successResponse(w, r, "login successfully", map[string]any{
-		"access_token": ss,
-		"user":         user,
-	})
+	app.successResponse(w, r, "login successfully", nil)
 }
 
 func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {

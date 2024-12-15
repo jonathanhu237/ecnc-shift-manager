@@ -5,10 +5,10 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 )
 
 func (app *Application) loggerMiddleware(next http.Handler) http.Handler {
@@ -26,7 +26,7 @@ func (app *Application) loggerMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
+func (app *Application) getRequesterMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get the token from cookie
 		cookie, err := r.Cookie("__ecnc_shift_manager_token")
@@ -42,7 +42,7 @@ func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
 		}
 
 		// parse the token
-		claims := &CustomClaims{}
+		claims := &jwt.RegisteredClaims{}
 		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(t *jwt.Token) (interface{}, error) {
 			return []byte(app.config.JWTSecret), nil
 		})
@@ -56,18 +56,20 @@ func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		requesterID, err := strconv.ParseInt(claims.Subject, 10, 64)
+		// get the requester details
+		requesterUsername := claims.Subject
+		requester, err := app.models.Users.SelectUserByUsername(requesterUsername)
 		if err != nil {
-			app.errorResponse(w, r, errInvalidToken)
+			switch {
+			case errors.Is(err, models.ErrRecordNotFound):
+				app.errorResponse(w, r, errInvalidToken)
+			default:
+				app.internalSeverError(w, r, err)
+			}
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), requesterCtxKey, &requester{
-			id:       requesterID,
-			username: claims.Username,
-			role:     claims.Role,
-			level:    claims.Level,
-		})
+		ctx := context.WithValue(r.Context(), requesterCtxKey, requester)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -81,12 +81,12 @@ var (
 func (app *Application) authGuardMiddleware(levelRequired int) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			requester, ok := r.Context().Value(requesterCtxKey).(*requester)
+			requester, ok := r.Context().Value(requesterCtxKey).(*models.User)
 			if !ok {
-				panic("requester not found in context")
+				panic("authGuardMiddleware must used after getRequesterMiddleware")
 			}
 
-			if requester.level < levelRequired {
+			if requester.Level < levelRequired {
 				app.errorResponse(w, r, errForbidden)
 				return
 			}
@@ -94,23 +94,4 @@ func (app *Application) authGuardMiddleware(levelRequired int) func(http.Handler
 			next.ServeHTTP(w, r)
 		})
 	}
-}
-
-func (app *Application) myInfoMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requester, ok := r.Context().Value(requesterCtxKey).(*requester)
-		if !ok {
-			panic("myInfoMiddleware should be used after getUserInfoMiddleware")
-		}
-
-		details, err := app.models.Users.SelectUserByUsername(requester.username)
-		if err != nil {
-			app.internalSeverError(w, r, err)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), requesterDetailsKey, details)
-
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
 }

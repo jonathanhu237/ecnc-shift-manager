@@ -7,9 +7,9 @@ import (
 )
 
 func (app *Application) getMyInfoHandler(w http.ResponseWriter, r *http.Request) {
-	myInfo, ok := r.Context().Value(requesterDetailsKey).(*models.User)
+	myInfo, ok := r.Context().Value(requesterCtxKey).(*models.User)
 	if !ok {
-		panic("getMyInfoHandler should be used after myInfoMiddleware")
+		panic("getMyInfoHandler should be used after getRequesterMiddleware")
 	}
 
 	app.successResponse(w, r, "get my info successfully", myInfo)

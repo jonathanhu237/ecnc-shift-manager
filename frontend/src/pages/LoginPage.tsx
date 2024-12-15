@@ -19,7 +19,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, APIResponse } from "@/lib/api";
 import { AxiosResponse } from "axios";
 import { useState } from "react";
@@ -47,6 +47,7 @@ export default function LoginPage() {
     });
 
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const mutation = useMutation({
         mutationFn: (data: z.infer<typeof formSchema>) => {
@@ -54,12 +55,13 @@ export default function LoginPage() {
         },
         onSuccess: (res: AxiosResponse<APIResponse>) => {
             const {
-                data: { code },
+                data: { code, data },
             } = res;
 
             if (code === 0) {
                 toast("登录成功");
                 navigate("/");
+                queryClient.setQueryData(["me"], data);
             } else if (code === 1001) {
                 setLoginError("用户名或密码错误，请重新输入。");
             }

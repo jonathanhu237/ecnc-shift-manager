@@ -118,3 +118,13 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 	// return a success message
 	app.successResponse(w, r, "user created successfully", user)
 }
+
+func (app *Application) getUsersHandler(w http.ResponseWriter, r *http.Request) {
+	users, err := app.models.Users.SelectUsers()
+	if err != nil {
+		app.internalSeverError(w, r, err)
+		return
+	}
+
+	app.successResponse(w, r, "get users successfully", users)
+}

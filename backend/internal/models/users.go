@@ -150,3 +150,51 @@ func (m *UserModel) UpdateUser(user *User) error {
 
 	return nil
 }
+
+func (m *UserModel) SelectUsers() ([]*User, error) {
+	query := `
+		SELECT
+			u.id,
+			u.username,
+			u.password_hash,
+			u.email,
+			u.full_name,
+			r.name,
+			r.level
+		FROM users AS u
+		INNER JOIN roles AS r
+			ON u.role_id = r.id
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	users := make([]*User, 0)
+	for rows.Next() {
+		user := &User{}
+		if err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.PasswordHash,
+			&user.Email,
+			&user.FullName,
+			&user.Role,
+			&user.Level,
+		); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

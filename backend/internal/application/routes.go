@@ -35,6 +35,7 @@ func (app *Application) routes() http.Handler {
 			})
 			r.Route("/me", func(r chi.Router) {
 				r.Get("/", app.getMyInfoHandler)
+				r.Post("/update-password", app.updateMyPasswordHandler)
 			})
 		})
 	})

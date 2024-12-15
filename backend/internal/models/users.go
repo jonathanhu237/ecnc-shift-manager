@@ -115,3 +115,38 @@ func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
 
 	return user, nil
 }
+
+func (m *UserModel) UpdateUser(user *User) error {
+	query := `
+		UPDATE users
+		SET
+			password_hash = $1,
+			email = $2,
+			role_id = (
+				SELECT id
+				FROM roles
+				WHERE name = $3
+			)
+		WHERE id = $4
+	`
+	args := []any{user.PasswordHash, user.Email, user.Role, user.ID}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, err := m.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	row, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if row == 0 {
+		return ErrRecordNotFound
+	}
+
+	return nil
+}

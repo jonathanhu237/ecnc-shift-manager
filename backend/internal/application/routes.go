@@ -36,6 +36,7 @@ func (app *Application) routes() http.Handler {
 				r.Route("/{userID}", func(r chi.Router) {
 					r.Use(app.getUserMiddleware)
 					r.Get("/", app.getUserHandler)
+					r.Post("/update-role", app.updateUserRoleHandler)
 				})
 			})
 			r.Route("/me", func(r chi.Router) {

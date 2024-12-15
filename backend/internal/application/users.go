@@ -139,3 +139,31 @@ func (app *Application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	app.successResponse(w, r, "get user successfully", user)
 }
+
+func (app *Application) updateUserRoleHandler(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value(userCtxKey).(*models.User)
+	if !ok {
+		app.internalSeverError(w, r, errors.New("getUserHandler must be used after getUserMiddleware"))
+		return
+	}
+
+	var payload struct {
+		Role string `json:"role" validate:"required,oneof=普通助理 资深助理 黑心"`
+	}
+	if err := app.readJSON(r, &payload); err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+	if err := app.validate.Struct(payload); err != nil {
+		app.validateError(w, r, err)
+		return
+	}
+
+	user.Role = payload.Role
+	if err := app.models.Users.UpdateUser(user); err != nil {
+		app.internalSeverError(w, r, err)
+		return
+	}
+
+	app.successResponse(w, r, "user updated successfully", user)
+}

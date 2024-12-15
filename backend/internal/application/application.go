@@ -85,10 +85,6 @@ func (app *Application) Run() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Start token cleaner
-	app.StartTokenCleaner(ctx)
-	app.logger.Info("token cleaner started")
-
 	// Start the mail sender
 	if err := app.StartMailSender(ctx, ch); err != nil {
 		app.logger.Error("failed to start the mail sender", slog.String("error", err.Error()))

@@ -25,7 +25,6 @@ func (app *Application) routes() http.Handler {
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/login", app.loginHandler)
 			r.With(app.getUserInfoMiddleware).Post("/logout", app.logoutHandler)
-			r.With(app.getUserInfoMiddleware).Post("/access_token/refresh", app.refreshAccessTokenHandler)
 		})
 
 		r.Group(func(r chi.Router) {

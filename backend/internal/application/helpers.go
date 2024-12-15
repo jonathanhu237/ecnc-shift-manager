@@ -2,11 +2,7 @@ package application
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/sha256"
 	"database/sql"
-	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -99,22 +95,6 @@ func (app *Application) validateError(w http.ResponseWriter, r *http.Request, er
 	errs := err.(validator.ValidationErrors)
 	message := fmt.Sprintf("validator for '%s' failed on the '%s'", errs[0].Field(), errs[0].Tag())
 	app.badRequest(w, r, errors.New(message))
-}
-
-func (app *Application) generateRefreshToken() (string, error) {
-	randomBytes := make([]byte, 32)
-
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return "", err
-	}
-
-	return base64.URLEncoding.EncodeToString(randomBytes), nil
-}
-
-func (app *Application) hashRefreshToken(token string) string {
-	hash := sha256.Sum256([]byte(token))
-	return hex.EncodeToString(hash[:])
 }
 
 func (app *Application) generateRandomPassword(length int) string {

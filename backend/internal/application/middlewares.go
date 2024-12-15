@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,25 +28,22 @@ func (app *Application) loggerMiddleware(next http.Handler) http.Handler {
 
 func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// get the authorization header
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			app.errorResponse(w, r, errAuthHeaderNotSet)
+		// get the token from cookie
+		cookie, err := r.Cookie("__ecnc_shift_manager_token")
+		if err != nil {
+			switch {
+			case errors.Is(err, http.ErrNoCookie):
+				app.errorResponse(w, r, errUnauthorized)
+
+			default:
+				app.internalSeverError(w, r, err)
+			}
 			return
 		}
-
-		// check if the header starts with "Bearer "
-		if !strings.HasPrefix(authHeader, "Bearer ") {
-			app.errorResponse(w, r, errInvalidAuthHeader)
-			return
-		}
-
-		// extract the token
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		// parse the token
 		claims := &CustomClaims{}
-		_, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(t *jwt.Token) (interface{}, error) {
 			return []byte(app.config.JWTSecret), nil
 		})
 		if err != nil {
@@ -72,7 +68,6 @@ func (app *Application) getUserInfoMiddleware(next http.Handler) http.Handler {
 			role:     claims.Role,
 			level:    claims.Level,
 		})
-
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

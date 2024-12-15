@@ -20,8 +20,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, APIResponse } from "@/lib/api";
-import { AxiosResponse } from "axios";
+import { api } from "@/lib/api";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -53,18 +52,19 @@ export default function LoginPage() {
         mutationFn: (data: z.infer<typeof formSchema>) => {
             return api.post("/auth/login", data);
         },
-        onSuccess: (res: AxiosResponse<APIResponse>) => {
-            const {
-                data: { code, data },
-            } = res;
+        onSuccess: (res) => {
+            toast("登录成功");
+            navigate("/");
+            queryClient.setQueryData(["me"], res.data);
+        },
+        onError: (err) => {
+            let message = err.message;
 
-            if (code === 0) {
-                toast("登录成功");
-                navigate("/");
-                queryClient.setQueryData(["me"], data);
-            } else if (code === 1001) {
-                setLoginError("用户名或密码错误，请重新输入。");
+            if (err.message === "invalid username or password") {
+                message = "用户名或密码错误，请重新登录。";
             }
+
+            setLoginError(message);
         },
     });
 

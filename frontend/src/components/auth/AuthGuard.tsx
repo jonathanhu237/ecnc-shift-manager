@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
 export default function AuthGuard({ children }: PropsWithChildren) {
     const { isPending, isError } = useQuery({
         queryKey: ["me"],
-        queryFn: () => api.get("/me"),
+        queryFn: () => api.get("/me").then((res) => res.data),
     });
 
     const navigate = useNavigate();

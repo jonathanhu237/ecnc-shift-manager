@@ -10,6 +10,7 @@ import DashboardLayout from "./layouts/DashboardLayout.tsx";
 import DashboardIndex from "./pages/DashboardIndex.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import UsersManagementPage from "./pages/UsersManagementPage.tsx";
+import BlackCoreGuard from "./components/auth/BlackCoreGuard.tsx";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -29,7 +30,11 @@ createRoot(document.getElementById("root")!).render(
                         <Route index element={<DashboardIndex />} />
                         <Route
                             path="users-management"
-                            element={<UsersManagementPage />}
+                            element={
+                                <BlackCoreGuard>
+                                    <UsersManagementPage />
+                                </BlackCoreGuard>
+                            }
                         />
                     </Route>
                     <Route path="auth" element={<AuthLayout />}>

@@ -24,7 +24,7 @@ export default function DashboardLayout() {
         <AuthGuard>
             <SidebarProvider>
                 <AppSidebar />
-                <SidebarInset>
+                <SidebarInset className="flex flex-col h-full">
                     <header className="flex h-12 items-center gap-2">
                         <SidebarTrigger className="ml-2" />
                         <Separator orientation="vertical" className="h-4" />
@@ -50,7 +50,7 @@ export default function DashboardLayout() {
                             </BreadcrumbList>
                         </Breadcrumb>
                     </header>
-                    <main>
+                    <main className="flex-1 flex">
                         <Outlet />
                     </main>
                 </SidebarInset>

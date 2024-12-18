@@ -1,13 +1,35 @@
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
-import { DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { useQueryClient } from "@tanstack/react-query";
 import { UserType } from "@/types/user";
-import { User } from "lucide-react";
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LogOut, Settings, User } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import {
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
+import { api, APIResponse } from "@/lib/api";
+import { AxiosResponse } from "axios";
+import { toast } from "sonner";
 
 export default function NavUser() {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const myInfo: UserType | undefined = queryClient.getQueryData(["me"]);
+    const mutation = useMutation({
+        mutationFn: () => api.post("/auth/logout"),
+        onSuccess: (res: AxiosResponse<APIResponse>) => {
+            queryClient.clear();
+            toast(res.data.message);
+            navigate("/auth/login");
+        },
+        onError: (err) => {
+            toast(err.message);
+        },
+    });
 
     return (
         <SidebarMenu>
@@ -31,6 +53,23 @@ export default function NavUser() {
                             </div>
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="end">
+                        <DropdownMenuGroup>
+                            <Link to="/settings">
+                                <DropdownMenuItem>
+                                    <Settings />
+                                    设置
+                                </DropdownMenuItem>
+                            </Link>
+                        </DropdownMenuGroup>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem onClick={() => mutation.mutate()}>
+                                <LogOut />
+                                登出
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                    </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
         </SidebarMenu>

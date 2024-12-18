@@ -1,4 +1,3 @@
-import { Home, Settings } from "lucide-react";
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -8,19 +7,7 @@ import {
     SidebarMenuItem,
 } from "../ui/sidebar";
 import { Link, useLocation } from "react-router";
-
-const items = [
-    {
-        title: "主页",
-        url: "/",
-        icon: Home,
-    },
-    {
-        title: "设置",
-        url: "/settings",
-        icon: Settings,
-    },
-];
+import { routes } from "@/lib/routes";
 
 export default function NavMain() {
     const location = useLocation();
@@ -30,7 +17,7 @@ export default function NavMain() {
             <SidebarGroupLabel>应用</SidebarGroupLabel>
             <SidebarGroupContent>
                 <SidebarMenu>
-                    {items.map((item) => (
+                    {routes.map((item) => (
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                                 asChild

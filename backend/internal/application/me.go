@@ -14,7 +14,7 @@ func (app *Application) getMyInfoHandler(w http.ResponseWriter, r *http.Request)
 		panic("getMyInfoHandler should be used after getRequesterMiddleware")
 	}
 
-	app.successResponse(w, r, "get my info successfully", myInfo)
+	app.successResponse(w, r, "获取个人信息成功", myInfo)
 }
 
 func (app *Application) updateMyPasswordHandler(w http.ResponseWriter, r *http.Request) {
@@ -61,5 +61,5 @@ func (app *Application) updateMyPasswordHandler(w http.ResponseWriter, r *http.R
 	}
 
 	// response
-	app.successResponse(w, r, "update password successfully", nil)
+	app.successResponse(w, r, "修改密码成功", nil)
 }

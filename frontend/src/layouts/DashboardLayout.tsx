@@ -50,7 +50,7 @@ export default function DashboardLayout() {
                             </BreadcrumbList>
                         </Breadcrumb>
                     </header>
-                    <main className="flex-1 flex">
+                    <main className="flex-1 flex px-2">
                         <Outlet />
                     </main>
                 </SidebarInset>

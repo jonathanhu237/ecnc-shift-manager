@@ -20,12 +20,13 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, APIResponse } from "@/lib/api";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import { AxiosResponse } from "axios";
 
 const formSchema = z.object({
     username: z.string().min(1, {
@@ -52,19 +53,15 @@ export default function LoginPage() {
         mutationFn: (data: z.infer<typeof formSchema>) => {
             return api.post("/auth/login", data);
         },
-        onSuccess: (res) => {
-            toast("登录成功");
+        onSuccess: (res: AxiosResponse<APIResponse>) => {
+            const { message, data } = res.data;
+
+            toast(message);
             navigate("/");
-            queryClient.setQueryData(["me"], res.data);
+            queryClient.setQueryData(["me"], data);
         },
         onError: (err) => {
-            let message = err.message;
-
-            if (err.message === "invalid username or password") {
-                message = "用户名或密码错误，请重新登录。";
-            }
-
-            setLoginError(message);
+            setLoginError(err.message);
         },
     });
 

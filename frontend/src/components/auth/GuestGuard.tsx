@@ -6,7 +6,7 @@ import { Navigate } from "react-router";
 export default function GuestGuard({ children }: PropsWithChildren) {
     const { isPending, isError } = useQuery({
         queryKey: ["me"],
-        queryFn: () => api.get<APIResponse>("/me").then((res) => res.data),
+        queryFn: () => api.get<APIResponse>("/me").then((res) => res.data.data),
     });
 
     if (isPending) return null;

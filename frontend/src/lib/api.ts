@@ -12,10 +12,10 @@ export const api = axios.create({
 });
 
 api.interceptors.response.use((response: AxiosResponse<APIResponse>) => {
-    const { code, message, data } = response.data;
+    const { code, message } = response.data;
 
     if (code === 0) {
-        return { ...response, data };
+        return response;
     } else {
         return Promise.reject(new Error(message));
     }

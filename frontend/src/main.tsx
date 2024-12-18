@@ -9,6 +9,7 @@ import AuthLayout from "./layouts/AuthLayout.tsx";
 import DashboardLayout from "./layouts/DashboardLayout.tsx";
 import DashboardIndex from "./pages/DashboardIndex.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
+import UsersManagementPage from "./pages/UsersManagementPage.tsx";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -26,6 +27,10 @@ createRoot(document.getElementById("root")!).render(
                 <Routes>
                     <Route path="/" element={<DashboardLayout />}>
                         <Route index element={<DashboardIndex />} />
+                        <Route
+                            path="users-management"
+                            element={<UsersManagementPage />}
+                        />
                     </Route>
                     <Route path="auth" element={<AuthLayout />}>
                         <Route path="login" element={<LoginPage />} />

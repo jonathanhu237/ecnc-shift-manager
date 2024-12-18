@@ -6,19 +6,19 @@ type appError struct {
 }
 
 var (
-	errUnauthorized     = appError{code: 401, message: "unauthorized"}
-	errForbidden        = appError{code: 403, message: "forbidden"}
-	errNotFound         = appError{code: 404, message: "not found"}
-	errMethodNotAllowed = appError{code: 405, message: "method not allowed"}
-	errInternalServer   = appError{code: 500, message: "internal server error"}
+	errUnauthorized     = appError{code: 401, message: "用户未登录"}
+	errForbidden        = appError{code: 403, message: "无权访问"}
+	errNotFound         = appError{code: 404, message: "未找到资源"}
+	errMethodNotAllowed = appError{code: 405, message: "请求方式非法"}
+	errInternalServer   = appError{code: 500, message: "服务器内部错误"}
 
-	errInvalidLogin = appError{code: 1001, message: "invalid username or password"}
+	errInvalidLogin = appError{code: 1001, message: "用户名或密码错误"}
 
-	errTokenIsExpired = appError{code: 2001, message: "token is expired"}
-	errInvalidToken   = appError{code: 2002, message: "invalid token"}
+	errTokenIsExpired = appError{code: 2001, message: "访问令牌过期"}
+	errInvalidToken   = appError{code: 2002, message: "无效的访问令牌"}
 
-	errUsernameExistsInCreateUser = appError{code: 3001, message: "username already exists"}
-	errEmailExistsInCreateUser    = appError{code: 3002, message: "email already exists"}
+	errUsernameExistsInCreateUser = appError{code: 3001, message: "用户已存在"}
+	errEmailExistsInCreateUser    = appError{code: 3002, message: "邮箱已存在"}
 
-	errInvalidOldPasswordInResetPassword = appError{code: 4001, message: "invalid old password"}
+	errInvalidOldPasswordInResetPassword = appError{code: 4001, message: "旧密码错误"}
 )

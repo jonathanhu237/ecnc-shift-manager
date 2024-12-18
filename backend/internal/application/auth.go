@@ -80,7 +80,7 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	// response
-	app.successResponse(w, r, "login successfully", user)
+	app.successResponse(w, r, "登录成功", user)
 }
 
 func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -94,5 +94,5 @@ func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	// response
-	app.successResponse(w, r, "logout successfully", nil)
+	app.successResponse(w, r, "登出成功", nil)
 }

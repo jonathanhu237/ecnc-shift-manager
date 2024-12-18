@@ -87,7 +87,7 @@
 }
 
 @layer base {
-    body {
+    * {
         @apply font-['LXGWWenKai'];
     }
 }

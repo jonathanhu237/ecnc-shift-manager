@@ -18,7 +18,7 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 	var payload struct {
 		Username string `json:"username" validate:"required"`
 		Email    string `json:"email" validate:"required,email"`
-		FullName string `json:"full_name" validate:"required"`
+		FullName string `json:"fullName" validate:"required"`
 		Role     string `json:"role" validate:"required,oneof=普通助理 资深助理 黑心"`
 	}
 

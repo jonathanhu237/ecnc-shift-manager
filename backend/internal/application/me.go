@@ -24,8 +24,8 @@ func (app *Application) updateMyPasswordHandler(w http.ResponseWriter, r *http.R
 	}
 
 	var payload struct {
-		OldPassword string `json:"old_password" validate:"required"`
-		NewPassword string `json:"new_password" validate:"required"`
+		OldPassword string `json:"oldPassword" validate:"required"`
+		NewPassword string `json:"newPassword" validate:"required"`
 	}
 	if err := app.readJSON(r, &payload); err != nil {
 		app.badRequest(w, r, err)

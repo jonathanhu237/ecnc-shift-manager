@@ -1,14 +1,14 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Route, Routes } from "react-router";
+import "./index.css";
 import AuthLayout from "./layouts/AuthLayout.tsx";
-import LoginPage from "./pages/LoginPage.tsx";
-import { Toaster } from "@/components/ui/sonner";
 import DashboardLayout from "./layouts/DashboardLayout.tsx";
 import DashboardIndex from "./pages/DashboardIndex.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
 
 const queryClient = new QueryClient({
     defaultOptions: {

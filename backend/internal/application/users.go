@@ -160,6 +160,11 @@ func (app *Application) updateUserRoleHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	if user.Username == "blackcore" {
+		app.errorResponse(w, r, errUpdateInitialBlackCoreRole)
+		return
+	}
+
 	user.Role = payload.Role
 	if err := app.models.Users.UpdateUser(user); err != nil {
 		app.internalSeverError(w, r, err)

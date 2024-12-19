@@ -21,4 +21,6 @@ var (
 	errEmailExistsInCreateUser    = appError{code: 3002, message: "邮箱已存在"}
 
 	errInvalidOldPasswordInResetPassword = appError{code: 4001, message: "旧密码错误"}
+
+	errUpdateInitialBlackCoreRole = appError{code: 5001, message: "禁止修改初始黑心的身份"}
 )

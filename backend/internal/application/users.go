@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/wneessen/go-mail"
 	"golang.org/x/crypto/bcrypt"
@@ -53,7 +54,7 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// generate random password
-	random_password := app.generateRandomPassword(12)
+	random_password := utils.GenerateRandomPassword(12)
 
 	// send the username and password to the e-mail
 	message := mail.NewMsg()

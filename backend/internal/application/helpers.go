@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	math_rand "math/rand"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -71,13 +70,4 @@ func (app *Application) validateError(w http.ResponseWriter, r *http.Request, er
 	errs := err.(validator.ValidationErrors)
 	message := fmt.Sprintf("validator for '%s' failed on the '%s'", errs[0].Field(), errs[0].Tag())
 	app.badRequest(w, r, errors.New(message))
-}
-
-func (app *Application) generateRandomPassword(length int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*")
-	random_password := make([]rune, length)
-	for i := range random_password {
-		random_password[i] = letters[math_rand.Intn(len(letters))]
-	}
-	return string(random_password)
 }

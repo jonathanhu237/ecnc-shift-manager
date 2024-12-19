@@ -11,6 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/config"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -123,7 +124,7 @@ func (app *Application) checkBlackcoreExists() error {
 		return err
 	}
 
-	random_password := app.generateRandomPassword(12)
+	random_password := utils.GenerateRandomPassword(12)
 	password_hash, err := bcrypt.GenerateFromPassword([]byte(random_password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

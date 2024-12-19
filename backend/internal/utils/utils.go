@@ -17,24 +17,24 @@ func GenerateRandomPassword(length int) string {
 	return string(random_password)
 }
 
-func randomChineseCharacter() string {
-	start := 0x4E00
-	end := 0x9FA5
-
-	return string(rune(rand.Intn(end-start+1) + start))
-}
-
 func generateRandomChineseName() string {
-	var surnames = []string{
-		"王", "李", "张", "刘", "陈", "杨", "赵", "黄", "周", "吴", "徐", "孙", "胡", "朱", "高", "林", "何", "郭", "马", "罗",
+	var commonSurnames = []string{
+		"王", "李", "张", "刘", "陈", "杨", "赵", "黄", "周", "吴",
+		"徐", "孙", "胡", "朱", "高", "林", "何", "郭", "马", "罗",
+	}
+	var commonNameCharacters = []string{
+		"伟", "强", "芳", "敏", "静", "丽", "刚", "杰", "娟", "勇",
+		"艳", "涛", "明", "军", "磊", "洋", "勇", "霞", "飞", "玲",
+		"超", "华", "平", "辉", "梅", "鑫", "龙", "鹏", "玉", "斌",
+		"庆", "建", "丹", "彬", "凤", "旭", "宁", "乐", "成", "欣",
 	}
 
-	surname := surnames[rand.Intn(len(surnames))]
+	surname := commonSurnames[rand.Intn(len(commonSurnames))]
 	nameLength := rand.Intn(2) + 1
 	name := ""
 
 	for i := 0; i < nameLength; i++ {
-		name += randomChineseCharacter()
+		name += commonNameCharacters[rand.Intn(len(commonNameCharacters))]
 	}
 
 	return surname + name

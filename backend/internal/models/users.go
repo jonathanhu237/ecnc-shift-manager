@@ -92,7 +92,6 @@ func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
 		INNER JOIN roles r
 		ON u.role_id = r.id
 		WHERE username = $1
-		ORDER BY u.created_at
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -198,6 +197,7 @@ func (m *UserModel) SelectUsers() ([]*User, error) {
 		FROM users AS u
 		INNER JOIN roles AS r
 			ON u.role_id = r.id
+		ORDER BY u.created_at
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

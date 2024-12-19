@@ -37,11 +37,6 @@ const columns: ColumnDef<UserType>[] = [
         cell: ({ row }) => {
             const user = row.original;
 
-            // prevent operating the blackcore user
-            if (user.username === "blackcore") {
-                return null;
-            }
-
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

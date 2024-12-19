@@ -12,7 +12,7 @@ type User struct {
 	Username     string `json:"username"`
 	PasswordHash string `json:"-"`
 	Email        string `json:"email"`
-	FullName     string `json:"full_name"`
+	FullName     string `json:"fullName"`
 	Role         string `json:"role"`
 	Level        int    `json:"level"`
 }

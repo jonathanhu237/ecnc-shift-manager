@@ -16,7 +16,7 @@ export default function ShiftTemplatesManagement() {
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
-                            <BreadcrumbPage>用户管理</BreadcrumbPage>
+                            <BreadcrumbPage>班表模板管理</BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>

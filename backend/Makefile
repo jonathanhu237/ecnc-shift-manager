@@ -1,6 +1,3 @@
-include ../.env
-export $(shell sed 's/=.*//' ../.env)
-
 DSN = postgres://postgres:${POSTGRES_PASSWORD}@localhost:5432/ecnc_shift_manager_db?sslmode=disable
 
 new_migration:

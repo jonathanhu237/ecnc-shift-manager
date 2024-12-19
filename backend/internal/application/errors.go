@@ -23,4 +23,6 @@ var (
 	errInvalidOldPasswordInResetPassword = appError{code: 4001, message: "旧密码错误"}
 
 	errUpdateInitialBlackCoreRole = appError{code: 5001, message: "禁止修改初始黑心的身份"}
+
+	errDeleteInitialBlackCore = appError{code: 6001, message: "禁止删除初始黑心"}
 )

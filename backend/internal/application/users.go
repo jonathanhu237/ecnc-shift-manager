@@ -181,6 +181,11 @@ func (app *Application) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Username == "blackcore" {
+		app.errorResponse(w, r, errDeleteInitialBlackCore)
+		return
+	}
+
 	if err := app.models.Users.DeleteUser(user.ID); err != nil {
 		app.internalSeverError(w, r, err)
 		return

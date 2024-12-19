@@ -118,7 +118,7 @@ func (app *Application) createUserHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// return a success message
-	app.successResponse(w, r, "user created successfully", user)
+	app.successResponse(w, r, "创建用户成功", user)
 }
 
 func (app *Application) getUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +171,7 @@ func (app *Application) updateUserRoleHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	app.successResponse(w, r, "user updated successfully", user)
+	app.successResponse(w, r, "更新用户身份成功", user)
 }
 
 func (app *Application) deleteUser(w http.ResponseWriter, r *http.Request) {
@@ -186,5 +186,5 @@ func (app *Application) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.successResponse(w, r, "user deleted successfully", nil)
+	app.successResponse(w, r, "删除用户成功", nil)
 }

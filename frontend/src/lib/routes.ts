@@ -1,4 +1,4 @@
-import { Home, UserCog } from "lucide-react";
+import { Home, LayoutPanelTop, UserCog } from "lucide-react";
 
 export const routes = [
     {
@@ -11,6 +11,12 @@ export const routes = [
         title: "用户管理",
         url: "/users-management",
         icon: UserCog,
+        levelRequired: 3,
+    },
+    {
+        title: "班表模板管理",
+        url: "shift-templates-management",
+        icon: LayoutPanelTop,
         levelRequired: 3,
     },
 ];

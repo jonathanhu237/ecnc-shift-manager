@@ -11,6 +11,7 @@ import DashboardIndex from "./pages/DashboardIndex.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import UsersManagementPage from "./pages/UsersManagementPage.tsx";
 import BlackCoreGuard from "./components/auth/BlackCoreGuard.tsx";
+import ShiftTemplatesManagement from "./pages/ShiftTemplatesManagement.tsx";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -33,6 +34,14 @@ createRoot(document.getElementById("root")!).render(
                             element={
                                 <BlackCoreGuard>
                                     <UsersManagementPage />
+                                </BlackCoreGuard>
+                            }
+                        />
+                        <Route
+                            path="shift-templates-management"
+                            element={
+                                <BlackCoreGuard>
+                                    <ShiftTemplatesManagement />
                                 </BlackCoreGuard>
                             }
                         />

@@ -25,11 +25,11 @@ export default function NavUser() {
         mutationFn: () => api.post("/auth/logout"),
         onSuccess: (res: AxiosResponse<APIResponse<UserType>>) => {
             queryClient.clear();
-            toast(res.data.message);
+            toast.success(res.data.message);
             navigate("/auth/login");
         },
         onError: (err) => {
-            toast(err.message);
+            toast.error(err.message);
         },
     });
     const [dialogOpen, setDialogOpen] = useState(false);

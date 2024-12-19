@@ -57,7 +57,7 @@ export default function LoginPage() {
         onSuccess: (res: AxiosResponse<APIResponse<UserType>>) => {
             const { message, data } = res.data;
 
-            toast(message);
+            toast.success(message);
             navigate("/");
             queryClient.setQueryData(["me"], data);
         },

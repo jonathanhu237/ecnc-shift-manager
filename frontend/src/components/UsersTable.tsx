@@ -110,7 +110,7 @@ export default function UsersTable() {
         return null;
     }
     if (isError) {
-        toast(error.message);
+        toast.error(error.message);
         return null;
     }
 

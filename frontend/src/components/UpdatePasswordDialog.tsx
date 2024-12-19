@@ -63,7 +63,7 @@ export default function UpdatePasswordDialog({ open, onOpenChange }: Props) {
         mutationFn: (data) => api.post("/me/update-password", data),
         onSuccess: (res) => {
             onOpenChange(false);
-            toast(res.data.message);
+            toast.success(res.data.message);
             setErrorMessage("");
             form.reset();
         },

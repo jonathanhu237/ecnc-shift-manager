@@ -50,7 +50,7 @@ export default function UpdateUserRoleDialog({
         onSuccess: (res: AxiosResponse<APIResponse<UserType>>) => {
             const updatedUser = res.data.data;
 
-            toast.success("更新用户身份成功");
+            toast.success(res.data.message);
             queryClient.setQueryData(["users"], (data: UserType[]) => {
                 return data.map((user) => {
                     return user.id === updatedUser.id ? updatedUser : user;
@@ -60,9 +60,7 @@ export default function UpdateUserRoleDialog({
             form.reset();
         },
         onError: (err) => {
-            toast.error("更新用户身份失败", {
-                description: err.message,
-            });
+            toast.error(err.message);
         },
     });
 

@@ -21,8 +21,8 @@ export default function DashboardIndex() {
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
-            <main className="px-2">
-                <div className="h-screen flex items-center justify-center">
+            <main className="px-2 flex-1 flex">
+                <div className="flex items-center justify-center flex-1">
                     <span>
                         如果你看到这里一片空白，不用担心，目前主页不会展示任何内容。
                     </span>

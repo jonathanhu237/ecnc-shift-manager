@@ -44,7 +44,7 @@ func (app *Application) Run() {
 	app.config = cfg
 
 	// Establish database connection
-	db, err := app.openDB()
+	db, err := models.OpenDB(cfg)
 	if err != nil {
 		app.logger.Error(err.Error())
 		os.Exit(1)

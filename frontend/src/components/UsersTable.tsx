@@ -13,12 +13,24 @@ import {
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 const columns: ColumnDef<UserType>[] = [
     {
         accessorKey: "username",
-        header: "用户名",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        column.toggleSorting(column.getIsSorted() === "asc");
+                    }}
+                >
+                    用户名
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            );
+        },
     },
     {
         accessorKey: "fullName",
@@ -30,7 +42,19 @@ const columns: ColumnDef<UserType>[] = [
     },
     {
         accessorKey: "role",
-        header: "身份",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        column.toggleSorting(column.getIsSorted() === "asc");
+                    }}
+                >
+                    身份
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            );
+        },
     },
     {
         id: "action",

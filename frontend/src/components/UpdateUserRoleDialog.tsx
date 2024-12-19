@@ -118,6 +118,7 @@ export default function UpdateUserRoleDialog({
                                     onOpenChange(false);
                                     form.reset();
                                 }}
+                                disabled={mutation.isPending}
                             >
                                 取消
                             </Button>

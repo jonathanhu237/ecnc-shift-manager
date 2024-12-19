@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/config"
 )
 

@@ -1,3 +1,9 @@
+import UsersTable from "@/components/UsersTable";
+
 export default function UsersManagementPage() {
-    return <div>UsersManagementPage</div>;
+    return (
+        <div className="container">
+            <UsersTable />
+        </div>
+    );
 }

@@ -27,6 +27,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import { AxiosResponse } from "axios";
+import { UserType } from "@/types/user";
 
 const formSchema = z.object({
     username: z.string().min(1, {
@@ -53,7 +54,7 @@ export default function LoginPage() {
         mutationFn: (data: z.infer<typeof formSchema>) => {
             return api.post("/auth/login", data);
         },
-        onSuccess: (res: AxiosResponse<APIResponse>) => {
+        onSuccess: (res: AxiosResponse<APIResponse<UserType>>) => {
             const { message, data } = res.data;
 
             toast(message);

@@ -56,7 +56,7 @@ export default function UpdatePasswordDialog({ open, onOpenChange }: Props) {
         },
     });
     const mutation = useMutation<
-        AxiosResponse<APIResponse>,
+        AxiosResponse<APIResponse<null>>,
         Error,
         { oldPassword: string; newPassword: string }
     >({

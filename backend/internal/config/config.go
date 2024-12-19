@@ -1,4 +1,4 @@
-package application
+package config
 
 import (
 	"fmt"
@@ -10,6 +10,8 @@ import (
 )
 
 type Config struct {
+	logger *slog.Logger
+
 	Environment        string
 	Port               int
 	PostgresPassword   string
@@ -20,49 +22,51 @@ type Config struct {
 	RabbitMQPassword   string
 }
 
-func (app *Application) readConfig() (*Config, error) {
+func ReadConfig(logger *slog.Logger) (*Config, error) {
 	if err := godotenv.Load("../.env"); err != nil {
 		return nil, err
 	}
 
-	cfg := &Config{}
+	cfg := &Config{
+		logger: logger,
+	}
 
-	cfg.Environment = app.readOptionalStringEnv("ENVIRONMENT", "development")
-	cfg.Port = app.readOptionalIntEnv("SERVER_PORT", 8080)
+	cfg.Environment = cfg.readOptionalStringEnv("ENVIRONMENT", "development")
+	cfg.Port = cfg.readOptionalIntEnv("SERVER_PORT", 8080)
 
-	postgresPassword, err := app.readRequiredStringEnv("POSTGRES_PASSWORD")
+	postgresPassword, err := cfg.readRequiredStringEnv("POSTGRES_PASSWORD")
 	if err != nil {
 		return nil, err
 	}
 	cfg.PostgresPassword = postgresPassword
 
-	jwtSecret, err := app.readRequiredStringEnv("JWT_SECRET")
+	jwtSecret, err := cfg.readRequiredStringEnv("JWT_SECRET")
 	if err != nil {
 		return nil, err
 	}
 	cfg.JWTSecret = jwtSecret
 
 	// mail client
-	mailClientSMTPHost, err := app.readRequiredStringEnv("MAIL_CLIENT_SMTP_HOST")
+	mailClientSMTPHost, err := cfg.readRequiredStringEnv("MAIL_CLIENT_SMTP_HOST")
 	if err != nil {
 		return nil, err
 	}
 	cfg.MailClientSMTPHost = mailClientSMTPHost
 
-	mailClientAddress, err := app.readRequiredStringEnv("MAIL_CLIENT_ADDRESS")
+	mailClientAddress, err := cfg.readRequiredStringEnv("MAIL_CLIENT_ADDRESS")
 	if err != nil {
 		return nil, err
 	}
 	cfg.MailClientAddress = mailClientAddress
 
-	mailClientPassword, err := app.readRequiredStringEnv("MAIL_CLIENT_PASSWORD")
+	mailClientPassword, err := cfg.readRequiredStringEnv("MAIL_CLIENT_PASSWORD")
 	if err != nil {
 		return nil, err
 	}
 	cfg.MailClientPassword = mailClientPassword
 
 	// rabbitmq
-	rabbitMQPassword, err := app.readRequiredStringEnv("RABBITMQ_PASSWORD")
+	rabbitMQPassword, err := cfg.readRequiredStringEnv("RABBITMQ_PASSWORD")
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +75,7 @@ func (app *Application) readConfig() (*Config, error) {
 	return cfg, nil
 }
 
-func (app *Application) readOptionalStringEnv(key, defaultValue string) string {
+func (cfg *Config) readOptionalStringEnv(key, defaultValue string) string {
 	val, ok := os.LookupEnv(key)
 	if !ok {
 		return defaultValue
@@ -80,7 +84,7 @@ func (app *Application) readOptionalStringEnv(key, defaultValue string) string {
 	return val
 }
 
-func (app *Application) readOptionalIntEnv(key string, defaultValue int) int {
+func (cfg *Config) readOptionalIntEnv(key string, defaultValue int) int {
 	val, ok := os.LookupEnv(key)
 	if !ok {
 		return defaultValue
@@ -88,7 +92,7 @@ func (app *Application) readOptionalIntEnv(key string, defaultValue int) int {
 
 	intVal, err := strconv.Atoi(val)
 	if err != nil {
-		app.logger.Warn(
+		cfg.logger.Warn(
 			"failed to parse environment variable, use default value",
 			slog.String("key", key),
 			slog.String("value", val),
@@ -100,7 +104,7 @@ func (app *Application) readOptionalIntEnv(key string, defaultValue int) int {
 	return intVal
 }
 
-func (app *Application) readRequiredStringEnv(key string) (string, error) {
+func (cfg *Config) readRequiredStringEnv(key string) (string, error) {
 	val, ok := os.LookupEnv(key)
 	if !ok {
 		return "", fmt.Errorf("environment %s is not set", key)

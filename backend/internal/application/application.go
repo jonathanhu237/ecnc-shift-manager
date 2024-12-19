@@ -9,13 +9,14 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/config"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Application struct {
-	config    *Config
+	config    *config.Config
 	logger    *slog.Logger
 	validate  *validator.Validate
 	server    *http.Server
@@ -35,7 +36,7 @@ func New() *Application {
 
 func (app *Application) Run() {
 	// Read config
-	cfg, err := app.readConfig()
+	cfg, err := config.ReadConfig(app.logger)
 	if err != nil {
 		app.logger.Error(err.Error())
 		os.Exit(1)

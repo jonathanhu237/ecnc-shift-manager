@@ -16,6 +16,7 @@ import { Button } from "./ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import UpdateUserRoleDialog from "./UpdateUserRoleDialog";
+import DeleteUserDialog from "./DeleteUserDialog";
 
 export default function UsersTable() {
     const { data, isPending, isError, error } = useQuery({
@@ -26,6 +27,7 @@ export default function UsersTable() {
                 .then((res) => res.data.data),
     });
     const [updateRoleDialogOpen, setUpdateRoleDialogOpen] = useState(false);
+    const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState<UserType | null>(null);
 
     const columns: ColumnDef<UserType>[] = [
@@ -96,7 +98,13 @@ export default function UsersTable() {
                                 更改身份
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => {
+                                    setDeleteUserDialogOpen(true);
+                                    setCurrentUser(user);
+                                }}
+                            >
                                 删除用户
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -121,6 +129,11 @@ export default function UsersTable() {
                 user={currentUser}
                 open={updateRoleDialogOpen}
                 onOpenChange={setUpdateRoleDialogOpen}
+            />
+            <DeleteUserDialog
+                user={currentUser}
+                open={deleteUserDialogOpen}
+                onOpenChange={setDeleteUserDialogOpen}
             />
         </>
     );

@@ -1,9 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 
-export type APIResponse = {
+export type APIResponse<T> = {
     code: number;
     message: string;
-    data: unknown;
+    data: T;
 };
 
 export const api = axios.create({
@@ -11,12 +11,14 @@ export const api = axios.create({
     withCredentials: true,
 });
 
-api.interceptors.response.use((response: AxiosResponse<APIResponse>) => {
-    const { code, message } = response.data;
+api.interceptors.response.use(
+    (response: AxiosResponse<APIResponse<unknown>>) => {
+        const { code, message } = response.data;
 
-    if (code === 0) {
-        return response;
-    } else {
-        return Promise.reject(new Error(message));
+        if (code === 0) {
+            return response;
+        } else {
+            return Promise.reject(new Error(message));
+        }
     }
-});
+);

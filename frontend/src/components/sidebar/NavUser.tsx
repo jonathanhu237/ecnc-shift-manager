@@ -23,7 +23,7 @@ export default function NavUser() {
     const myInfo: UserType | undefined = queryClient.getQueryData(["me"]);
     const mutation = useMutation({
         mutationFn: () => api.post("/auth/logout"),
-        onSuccess: (res: AxiosResponse<APIResponse>) => {
+        onSuccess: (res: AxiosResponse<APIResponse<UserType>>) => {
             queryClient.clear();
             toast(res.data.message);
             navigate("/auth/login");

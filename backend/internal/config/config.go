@@ -5,8 +5,6 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -23,10 +21,6 @@ type Config struct {
 }
 
 func ReadConfig(logger *slog.Logger) (*Config, error) {
-	if err := godotenv.Load("../.env"); err != nil {
-		return nil, err
-	}
-
 	cfg := &Config{
 		logger: logger,
 	}

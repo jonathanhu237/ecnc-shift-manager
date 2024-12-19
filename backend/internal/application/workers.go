@@ -79,7 +79,7 @@ func (app *Application) StartMailSender(ctx context.Context, ch *amqp.Channel) e
 
 				if err := mailClient.Send(message); err != nil {
 					app.logger.Error("failed to send mail", slog.String("error", err.Error()))
-					if err := d.Nack(false, false); err != nil {
+					if err := d.Nack(false, true); err != nil {
 						app.logger.Error("failed to nack message", slog.String("error", err.Error()))
 					}
 					continue

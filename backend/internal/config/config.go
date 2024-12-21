@@ -37,7 +37,7 @@ func ReadConfig(logger *slog.Logger) (*Config, error) {
 	}
 
 	cfg.Environment = cfg.readStringEnv("ENVIRONMENT")
-	cfg.ServerPort = cfg.readIntEnv("SERVER_PORT")
+	cfg.ServerPort = cfg.readIntEnv("API_SERVER_PORT")
 	cfg.JWTSecret = cfg.readStringEnv("JWT_SECRET")
 
 	// postgres
@@ -68,7 +68,8 @@ func (cfg *Config) readStringEnv(key string) string {
 func (cfg *Config) readIntEnv(key string) int {
 	val := os.Getenv(key)
 	if val == "" {
-		cfg.logger.Warn("Environment variable is empty.", slog.String("key", key))
+		cfg.logger.Warn("Environment variable is empty, use zero instead.", slog.String("key", key))
+		return 0
 	}
 
 	intVal, err := strconv.Atoi(val)

@@ -14,9 +14,10 @@ func OpenDB(cfg *config.Config) (*sql.DB, error) {
 	db, err := sql.Open(
 		"pgx",
 		fmt.Sprintf(
-			"postgres://%s:%s@localhost:5432/%s?sslmode=disable",
+			"postgres://%s:%s@%s:5432/%s?sslmode=disable",
 			cfg.Postgres.User,
 			cfg.Postgres.Password,
+			cfg.Postgres.Host,
 			cfg.Postgres.DB,
 		),
 	)

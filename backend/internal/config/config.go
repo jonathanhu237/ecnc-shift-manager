@@ -17,6 +17,7 @@ type Config struct {
 		User     string
 		Password string
 		DB       string
+		Host     string
 	}
 
 	RabbitMQ struct {
@@ -44,6 +45,7 @@ func ReadConfig(logger *slog.Logger) (*Config, error) {
 	cfg.Postgres.User = cfg.readStringEnv("POSTGRES_USER")
 	cfg.Postgres.Password = cfg.readStringEnv("POSTGRES_PASSWORD")
 	cfg.Postgres.DB = cfg.readStringEnv("POSTGRES_DB")
+	cfg.Postgres.Host = cfg.readStringEnv("POSTGRES_HOST")
 
 	// rabbitmq
 	cfg.RabbitMQ.User = cfg.readStringEnv("RABBITMQ_DEFAULT_USER")

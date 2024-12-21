@@ -11,7 +11,15 @@ import (
 )
 
 func OpenDB(cfg *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("pgx", fmt.Sprintf("postgres://postgres:%s@localhost:5432/ecnc_shift_manager_db?sslmode=disable", cfg.PostgresPassword))
+	db, err := sql.Open(
+		"pgx",
+		fmt.Sprintf(
+			"postgres://%s:%s@localhost:5432/%s?sslmode=disable",
+			cfg.Postgres.User,
+			cfg.Postgres.Password,
+			cfg.Postgres.DB,
+		),
+	)
 	if err != nil {
 		return nil, err
 	}

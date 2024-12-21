@@ -62,7 +62,7 @@ func (app *Application) Run() {
 	app.logger.Info("self check completed")
 
 	// establish rabbitmq mail producer
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://rabbitmq:%s@localhost:5672/", app.config.RabbitMQPassword))
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@localhost:5672/", app.config.RabbitMQ.User, app.config.RabbitMQ.Password))
 	if err != nil {
 		app.logger.Error(err.Error())
 		os.Exit(1)
@@ -96,7 +96,7 @@ func (app *Application) Run() {
 
 	// Start the server
 	app.server = &http.Server{
-		Addr:         fmt.Sprintf(":%d", app.config.Port),
+		Addr:         fmt.Sprintf(":%d", app.config.ServerPort),
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,

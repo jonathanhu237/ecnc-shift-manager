@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -10,14 +9,26 @@ import (
 type Config struct {
 	logger *slog.Logger
 
-	Environment        string
-	Port               int
-	PostgresPassword   string
-	JWTSecret          string
-	MailClientSMTPHost string
-	MailClientAddress  string
-	MailClientPassword string
-	RabbitMQPassword   string
+	Environment string
+	ServerPort  int
+	JWTSecret   string
+
+	Postgres struct {
+		User     string
+		Password string
+		DB       string
+	}
+
+	RabbitMQ struct {
+		User     string
+		Password string
+	}
+
+	MailClient struct {
+		SMTPHost string
+		Sender   string
+		Password string
+	}
 }
 
 func ReadConfig(logger *slog.Logger) (*Config, error) {
@@ -25,69 +36,56 @@ func ReadConfig(logger *slog.Logger) (*Config, error) {
 		logger: logger,
 	}
 
-	cfg.Environment = cfg.readOptionalStringEnv("ENVIRONMENT", "development")
-	cfg.Port = cfg.readOptionalIntEnv("SERVER_PORT", 8080)
+	cfg.Environment = cfg.readStringEnv("ENVIRONMENT", "development")
+	cfg.ServerPort = cfg.readIntEnv("SERVER_PORT", 8080)
+	cfg.JWTSecret = cfg.readStringEnv("JWT_SECRET", "")
 
-	postgresPassword, err := cfg.readRequiredStringEnv("POSTGRES_PASSWORD")
-	if err != nil {
-		return nil, err
-	}
-	cfg.PostgresPassword = postgresPassword
-
-	jwtSecret, err := cfg.readRequiredStringEnv("JWT_SECRET")
-	if err != nil {
-		return nil, err
-	}
-	cfg.JWTSecret = jwtSecret
-
-	// mail client
-	mailClientSMTPHost, err := cfg.readRequiredStringEnv("MAIL_CLIENT_SMTP_HOST")
-	if err != nil {
-		return nil, err
-	}
-	cfg.MailClientSMTPHost = mailClientSMTPHost
-
-	mailClientAddress, err := cfg.readRequiredStringEnv("MAIL_CLIENT_ADDRESS")
-	if err != nil {
-		return nil, err
-	}
-	cfg.MailClientAddress = mailClientAddress
-
-	mailClientPassword, err := cfg.readRequiredStringEnv("MAIL_CLIENT_PASSWORD")
-	if err != nil {
-		return nil, err
-	}
-	cfg.MailClientPassword = mailClientPassword
+	// postgres
+	cfg.Postgres.User = cfg.readStringEnv("POSTGRES_USER", "postgres")
+	cfg.Postgres.Password = cfg.readStringEnv("POSTGRES_PASSWORD", "")
+	cfg.Postgres.DB = cfg.readStringEnv("POSTGRES_DB", "ecnc_shift_manager_db")
 
 	// rabbitmq
-	rabbitMQPassword, err := cfg.readRequiredStringEnv("RABBITMQ_PASSWORD")
-	if err != nil {
-		return nil, err
-	}
-	cfg.RabbitMQPassword = rabbitMQPassword
+	cfg.RabbitMQ.User = cfg.readStringEnv("RABBITMQ_DEFAULT_USER", "rabbitmq")
+	cfg.RabbitMQ.Password = cfg.readStringEnv("RABBITMQ_DEFAULT_PASS", "")
+
+	// Email
+	cfg.MailClient.SMTPHost = cfg.readStringEnv("MAIL_CLIENT_SMTP_HOST", "")
+	cfg.MailClient.Sender = cfg.readStringEnv("MAIL_CLIENT_SENDER", "")
+	cfg.MailClient.Password = cfg.readStringEnv("MAIL_CLIENT_PASSWORD", "")
 
 	return cfg, nil
 }
 
-func (cfg *Config) readOptionalStringEnv(key, defaultValue string) string {
+func (cfg *Config) readStringEnv(key, defaultValue string) string {
 	val, ok := os.LookupEnv(key)
 	if !ok {
+		cfg.logger.Warn(
+			"Environment variable not found, use default value instead.",
+			slog.String("key", key),
+			slog.String("default_value", defaultValue),
+		)
 		return defaultValue
 	}
 
 	return val
 }
 
-func (cfg *Config) readOptionalIntEnv(key string, defaultValue int) int {
+func (cfg *Config) readIntEnv(key string, defaultValue int) int {
 	val, ok := os.LookupEnv(key)
 	if !ok {
+		cfg.logger.Warn(
+			"Environment variable not found, use default value instead.",
+			slog.String("key", key),
+			slog.Int("default_value", defaultValue),
+		)
 		return defaultValue
 	}
 
 	intVal, err := strconv.Atoi(val)
 	if err != nil {
 		cfg.logger.Warn(
-			"failed to parse environment variable, use default value",
+			"Environment variable is not a valid integer, use default value instead.",
 			slog.String("key", key),
 			slog.String("value", val),
 			slog.Int("default_value", defaultValue),
@@ -96,13 +94,4 @@ func (cfg *Config) readOptionalIntEnv(key string, defaultValue int) int {
 	}
 
 	return intVal
-}
-
-func (cfg *Config) readRequiredStringEnv(key string) (string, error) {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		return "", fmt.Errorf("environment %s is not set", key)
-	}
-
-	return val, nil
 }

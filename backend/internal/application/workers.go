@@ -19,12 +19,12 @@ type MailPayload struct {
 func (app *Application) StartMailSender(ctx context.Context, ch *amqp.Channel) error {
 	// establish mail client
 	mailClient, err := mail.NewClient(
-		app.config.MailClientSMTPHost,
+		app.config.MailClient.SMTPHost,
 		mail.WithPort(465),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain),
 		mail.WithSSL(),
-		mail.WithUsername(app.config.MailClientAddress),
-		mail.WithPassword(app.config.MailClientPassword),
+		mail.WithUsername(app.config.MailClient.Sender),
+		mail.WithPassword(app.config.MailClient.Password),
 	)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (app *Application) StartMailSender(ctx context.Context, ch *amqp.Channel) e
 				message := mail.NewMsg()
 				message.Subject(mailPayload.Subject)
 				message.SetBodyString(mail.TypeTextPlain, mailPayload.Body)
-				if err := message.From(app.config.MailClientAddress); err != nil {
+				if err := message.From(app.config.MailClient.Sender); err != nil {
 					app.logger.Error("failed to set mail sender", slog.String("error", err.Error()))
 					if err := d.Nack(false, false); err != nil {
 						app.logger.Error("failed to nack message", slog.String("error", err.Error()))

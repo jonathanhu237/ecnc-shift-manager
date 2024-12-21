@@ -31,6 +31,13 @@ type Config struct {
 		Sender   string
 		Password string
 	}
+
+	InitialAdmin struct {
+		Username string
+		FullName string
+		Email    string
+		Password string
+	}
 }
 
 func ReadConfig(logger *slog.Logger) (*Config, error) {
@@ -58,13 +65,19 @@ func ReadConfig(logger *slog.Logger) (*Config, error) {
 	cfg.MailClient.Sender = cfg.readStringEnv("MAIL_CLIENT_SENDER")
 	cfg.MailClient.Password = cfg.readStringEnv("MAIL_CLIENT_PASSWORD")
 
+	// Initial Admin
+	cfg.InitialAdmin.Username = cfg.readStringEnv("INITIAL_ADMIN_USERNAME")
+	cfg.InitialAdmin.FullName = cfg.readStringEnv("INITIAL_ADMIN_FULLNAME")
+	cfg.InitialAdmin.Email = cfg.readStringEnv("INITIAL_ADMIN_EMAIL")
+	cfg.InitialAdmin.Password = cfg.readStringEnv("INITIAL_ADMIN_PASSWORD")
+
 	return cfg, nil
 }
 
 func (cfg *Config) readStringEnv(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		cfg.logger.Warn("Environment variable is empty.", slog.String("key", key))
+		cfg.logger.Warn("environment variable is empty", slog.String("key", key))
 	}
 	return val
 }
@@ -72,14 +85,14 @@ func (cfg *Config) readStringEnv(key string) string {
 func (cfg *Config) readIntEnv(key string) int {
 	val := os.Getenv(key)
 	if val == "" {
-		cfg.logger.Warn("Environment variable is empty, use zero instead.", slog.String("key", key))
+		cfg.logger.Warn("environment variable is empty, use zero instead", slog.String("key", key))
 		return 0
 	}
 
 	intVal, err := strconv.Atoi(val)
 	if err != nil {
 		cfg.logger.Warn(
-			"Environment variable is not a valid integer, use zero instead.",
+			"environment variable is not a valid integer, use zero instead",
 			slog.String("key", key),
 			slog.String("value", val),
 		)

@@ -160,7 +160,7 @@ func (app *Application) updateUserRoleHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if user.Username == "blackcore" {
+	if user.Username == app.config.InitialAdmin.Username {
 		app.errorResponse(w, r, errUpdateInitialBlackCoreRole)
 		return
 	}
@@ -181,7 +181,7 @@ func (app *Application) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Username == "blackcore" {
+	if user.Username == app.config.InitialAdmin.Username {
 		app.errorResponse(w, r, errDeleteInitialBlackCore)
 		return
 	}

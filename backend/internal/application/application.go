@@ -11,7 +11,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/config"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
-	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -124,18 +123,17 @@ func (app *Application) checkBlackcoreExists() error {
 		return err
 	}
 
-	random_password := utils.GenerateRandomPassword(12)
-	password_hash, err := bcrypt.GenerateFromPassword([]byte(random_password), bcrypt.DefaultCost)
+	password_hash, err := bcrypt.GenerateFromPassword([]byte(app.config.InitialAdmin.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
 	if !exists {
 		user := &models.User{
-			Username:     "blackcore",
+			Username:     app.config.InitialAdmin.Username,
 			PasswordHash: string(password_hash), // ecnc_blackcore
-			Email:        "initialBlackcore@ecnc.com",
-			FullName:     "初始黑心",
+			Email:        app.config.InitialAdmin.Email,
+			FullName:     app.config.InitialAdmin.FullName,
 			Role:         "黑心",
 		}
 
@@ -143,7 +141,7 @@ func (app *Application) checkBlackcoreExists() error {
 			return err
 		}
 
-		app.logger.Warn("blackcore does not exist, create a new one", slog.String("password", random_password))
+		app.logger.Warn("blackcore does not exist, create a new one")
 	}
 
 	return nil

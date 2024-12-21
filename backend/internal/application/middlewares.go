@@ -123,22 +123,3 @@ func (app *Application) getUserMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
-func (app *Application) corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		if app.config.Environment == "development" {
-			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-		}
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}

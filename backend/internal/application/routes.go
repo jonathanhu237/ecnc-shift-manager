@@ -13,7 +13,6 @@ func (app *Application) routes() http.Handler {
 
 	r.Use(app.loggerMiddleware)
 	r.Use(middleware.Recoverer)
-	r.Use(app.corsMiddleware)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		app.badRequest(w, r, errors.New("route does not exist"))

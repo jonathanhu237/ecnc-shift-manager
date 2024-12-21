@@ -4,13 +4,22 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [react()],
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-        },
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    define: {
-        "process.env": process.env,
+  },
+  define: {
+    "process.env": process.env,
+  },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:" + process.env.API_SERVER_PORT,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
     },
+  },
 });

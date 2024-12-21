@@ -22,29 +22,27 @@ func (app *Application) routes() http.Handler {
 		app.errorResponse(w, r, errMethodNotAllowed)
 	})
 
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Route("/auth", func(r chi.Router) {
-			r.Post("/login", app.loginHandler)
-			r.With(app.getRequesterMiddleware).Post("/logout", app.logoutHandler)
-		})
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/login", app.loginHandler)
+		r.With(app.getRequesterMiddleware).Post("/logout", app.logoutHandler)
+	})
 
-		r.Group(func(r chi.Router) {
-			r.Use(app.getRequesterMiddleware)
-			r.Route("/users", func(r chi.Router) {
-				r.Use(app.authGuardMiddleware(blackcoreLevel))
-				r.Post("/", app.createUserHandler)
-				r.Get("/", app.getUsersHandler)
-				r.Route("/{userID}", func(r chi.Router) {
-					r.Use(app.getUserMiddleware)
-					r.Get("/", app.getUserHandler)
-					r.Delete("/", app.deleteUser)
-					r.Post("/update-role", app.updateUserRoleHandler)
-				})
+	r.Group(func(r chi.Router) {
+		r.Use(app.getRequesterMiddleware)
+		r.Route("/users", func(r chi.Router) {
+			r.Use(app.authGuardMiddleware(blackcoreLevel))
+			r.Post("/", app.createUserHandler)
+			r.Get("/", app.getUsersHandler)
+			r.Route("/{userID}", func(r chi.Router) {
+				r.Use(app.getUserMiddleware)
+				r.Get("/", app.getUserHandler)
+				r.Delete("/", app.deleteUser)
+				r.Post("/update-role", app.updateUserRoleHandler)
 			})
-			r.Route("/me", func(r chi.Router) {
-				r.Get("/", app.getMyInfoHandler)
-				r.Post("/update-password", app.updateMyPasswordHandler)
-			})
+		})
+		r.Route("/me", func(r chi.Router) {
+			r.Get("/", app.getMyInfoHandler)
+			r.Post("/update-password", app.updateMyPasswordHandler)
 		})
 	})
 

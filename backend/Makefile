@@ -1,4 +1,7 @@
-DSN = postgres://postgres:${POSTGRES_PASSWORD}@localhost:5432/ecnc_shift_manager_db?sslmode=disable
+include ../.env
+export $(shell sed 's/=.*//' ../.env)
+
+DSN = postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?sslmode=disable
 
 new_migration:
 	migrate create -seq -ext=.sql -dir=./migrations ${name}

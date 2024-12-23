@@ -107,3 +107,24 @@ func (m *ScheduleTemplateModel) SelectAll() ([]*ScheduleTemplate, error) {
 
 	return scheduleTemplates, nil
 }
+
+func (m *ScheduleTemplateModel) InsertScheduleTemplate(name, description string) (*ScheduleTemplate, error) {
+	query := `
+		INSERT INTO schedule_templates (name, description)
+		VALUES ($1, $2)
+		RETURNING id, created_at
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	st := &ScheduleTemplate{
+		Name:        name,
+		Description: description,
+	}
+	if err := m.DB.QueryRowContext(ctx, query, st.Name, st.Description).Scan(st.ID, st.Description); err != nil {
+		return nil, err
+	}
+
+	return st, nil
+}

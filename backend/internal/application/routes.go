@@ -43,6 +43,10 @@ func (app *Application) routes() http.Handler {
 			r.Get("/", app.getMyInfoHandler)
 			r.Post("/update-password", app.updateMyPasswordHandler)
 		})
+		r.Route("/schedule-templates", func(r chi.Router) {
+			r.Use(app.authGuardMiddleware(blackcoreLevel))
+			r.Get("/", app.getAllScheduleTemplates)
+		})
 	})
 
 	return r

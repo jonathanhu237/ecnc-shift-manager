@@ -7,13 +7,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - internal
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 3s
-    restart: always
+    ports:
+      - "5432:5432"
+    restart: none
 
   rabbitmq:
     image: rabbitmq:4.0.5-management
@@ -23,13 +19,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - internal
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 3s
-    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: none
 
 volumes:
   postgres_data:

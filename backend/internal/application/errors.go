@@ -2,11 +2,6 @@ package application
 
 import "errors"
 
-type appError struct {
-	code    int
-	message string
-}
-
 var (
 	errUnauthorized                      = errors.New("用户未登录")
 	errForbidden                         = errors.New("无权访问")

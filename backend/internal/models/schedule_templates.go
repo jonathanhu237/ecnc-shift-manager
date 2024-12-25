@@ -122,9 +122,25 @@ func (m *ScheduleTemplateModel) InsertScheduleTemplate(name, description string)
 		Name:        name,
 		Description: description,
 	}
-	if err := m.DB.QueryRowContext(ctx, query, st.Name, st.Description).Scan(st.ID, st.Description); err != nil {
+	if err := m.DB.QueryRowContext(ctx, query, st.Name, st.Description).Scan(&st.ID, &st.CreatedAt); err != nil {
 		return nil, err
 	}
 
 	return st, nil
+}
+
+func (m *ScheduleTemplateModel) CheckTemplateNameValid(name string) (bool, error) {
+	query := `
+		SELECT EXISTS (SELECT 1 FROM schedule_templates WHERE name = $1)
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var exists bool
+	if err := m.DB.QueryRowContext(ctx, query, name).Scan(&exists); err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }

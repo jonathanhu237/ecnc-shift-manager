@@ -23,5 +23,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy

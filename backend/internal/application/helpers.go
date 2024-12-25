@@ -36,7 +36,7 @@ func (app *Application) writeJSON(w http.ResponseWriter, r *http.Request, status
 }
 
 type response struct {
-	Code    int    `json:"code"`
+	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 }
@@ -44,22 +44,22 @@ type response struct {
 // TODO: replace "code" with "success"
 func (app *Application) successResponse(w http.ResponseWriter, r *http.Request, message string, data any) {
 	app.writeJSON(w, r, http.StatusOK, response{
-		Code:    0,
+		Success: true,
 		Message: message,
 		Data:    data,
 	})
 }
 
-func (app *Application) errorResponse(w http.ResponseWriter, r *http.Request, err appError) {
+func (app *Application) errorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.writeJSON(w, r, http.StatusOK, response{
-		Code:    err.code,
-		Message: err.message,
+		Success: false,
+		Message: err.Error(),
 		Data:    nil,
 	})
 }
 
 func (app *Application) badRequest(w http.ResponseWriter, r *http.Request, err error) {
-	app.errorResponse(w, r, appError{code: http.StatusBadRequest, message: err.Error()})
+	app.errorResponse(w, r, err)
 }
 
 func (app *Application) internalSeverError(w http.ResponseWriter, r *http.Request, err error) {

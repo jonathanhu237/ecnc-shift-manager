@@ -18,6 +18,7 @@ export default defineConfig({
       "/api": {
         target:
           (process.env.API_SERVER_HOST ?? "http://localhost") +
+          ":" +
           (process.env.API_SERVER_PORT ?? "8080"),
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),

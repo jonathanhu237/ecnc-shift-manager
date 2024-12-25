@@ -2,8 +2,7 @@ package application
 
 import "net/http"
 
-// TODO: add "handler" to the end of the function
-func (app *Application) getAllScheduleTemplates(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getAllScheduleTemplatesHandler(w http.ResponseWriter, r *http.Request) {
 	templates, err := app.models.ScheduleTemplate.SelectAll()
 	if err != nil {
 		app.internalSeverError(w, r, err)

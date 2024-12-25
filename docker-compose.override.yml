@@ -9,21 +9,4 @@ services:
       - "5672:5672"
       - "15672:15672"
     restart: none
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
-    ports:
-      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
-    volumes:
-      - ./backend:/app
-    networks:
-      - internal
-    env_file:
-      - .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+    

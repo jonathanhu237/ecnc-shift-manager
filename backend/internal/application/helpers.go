@@ -41,6 +41,7 @@ type response struct {
 	Data    any    `json:"data"`
 }
 
+// TODO: replace "code" with "success"
 func (app *Application) successResponse(w http.ResponseWriter, r *http.Request, message string, data any) {
 	app.writeJSON(w, r, http.StatusOK, response{
 		Code:    0,

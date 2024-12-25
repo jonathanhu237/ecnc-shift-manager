@@ -15,11 +15,11 @@ type ScheduleTemplateShift struct {
 }
 
 type ScheduleTemplate struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Shifts      []*ScheduleTemplateShift
-	CreatedAt   time.Time
+	ID          int64                    `json:"id"`
+	Name        string                   `json:"name"`
+	Description string                   `json:"description"`
+	Shifts      []*ScheduleTemplateShift `json:"shifts"`
+	CreatedAt   time.Time                `json:"createdAt"`
 }
 
 type ScheduleTemplateModel struct {

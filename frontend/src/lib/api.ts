@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 
 export type APIResponse<T> = {
-  code: number;
+  success: boolean;
   message: string;
   data: T;
 };
@@ -13,9 +13,9 @@ export const api = axios.create({
 
 api.interceptors.response.use(
   (response: AxiosResponse<APIResponse<unknown>>) => {
-    const { code, message } = response.data;
+    const { success, message } = response.data;
 
-    if (code === 0) {
+    if (success === true) {
       return response;
     } else {
       return Promise.reject(new Error(message));

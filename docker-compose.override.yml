@@ -1,6 +1,26 @@
 services:
   postgres:
+    ports:
+      - "5432:5432"
     restart: none
-  
+
   rabbitmq:
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     restart: none
+
+  backend:
+    image: cosmtrek/air
+    working_dir: /app
+    ports:
+      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+    networks:
+      - internal
+    depends_on:
+      - postgres
+      - rabbitmq

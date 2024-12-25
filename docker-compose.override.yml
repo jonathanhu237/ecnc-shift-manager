@@ -1,0 +1,6 @@
+services:
+  postgres:
+    restart: none
+  
+  rabbitmq:
+    restart: none

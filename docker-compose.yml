@@ -9,6 +9,7 @@ services:
       - internal
     ports:
       - "5432:5432"
+    restart: always
   
   rabbitmq:
     image: rabbitmq:4.0.5-management
@@ -21,6 +22,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    restart: always
 
 volumes:
   postgres_data:

@@ -11,16 +11,17 @@ services:
     restart: none
 
   backend:
-    image: cosmtrek/air
-    working_dir: /app
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
     ports:
       - "${API_SERVER_PORT}:${API_SERVER_PORT}"
-    env_file:
-      - .env
     volumes:
       - ./backend:/app
     networks:
       - internal
+    env_file:
+      - .env
     depends_on:
       - postgres
       - rabbitmq

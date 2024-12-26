@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 )
 
@@ -35,9 +36,20 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 	// insert the template
 	template, err := h.models.InsertScheduleTemplate(payload.Name, payload.Description)
 	if err != nil {
-		// TODO: check the constrain
-		h.internalServerError(w, r, err)
-		return
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			switch {
+			case pgErr.ConstraintName == "schedule_templates_name_key":
+				h.errorResponse(w, r, errors.New("班表模板名已存在"))
+				return
+			default:
+				h.internalServerError(w, r, err)
+				return
+			}
+		} else {
+			h.internalServerError(w, r, err)
+			return
+		}
 	}
 
 	h.successResponse(w, r, "创建班表模板成功", template)

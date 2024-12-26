@@ -22,14 +22,14 @@ func (m *Models) InsertUser(user *User) error {
 	query := `
 		INSERT INTO users (username, email, password_hash, full_name, role_id)
 		VALUES ($1, $2, $3, $4, (SELECT id FROM roles WHERE name = $5))
-		RETURNING id, created_at
+		RETURNING id, (SELECT level FROM roles WHERE name = $5), created_at
 	`
 	args := []any{user.Username, user.Email, user.PasswordHash, user.FullName, user.Role}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := m.db.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.CreatedAt); err != nil {
+	if err := m.db.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.Level, &user.CreatedAt); err != nil {
 		return err
 	}
 

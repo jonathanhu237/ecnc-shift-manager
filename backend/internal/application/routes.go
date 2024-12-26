@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	blackCoreLevel = 3
+	blackCoreLevel int32 = 3
 )
 
 func (app *Application) routes() http.Handler {

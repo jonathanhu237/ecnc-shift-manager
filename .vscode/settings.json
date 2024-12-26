@@ -3,6 +3,7 @@
     "amqp",
     "ecnc",
     "jackc",
+    "pgconn",
     "stdlib"
   ]
 }

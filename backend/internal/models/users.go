@@ -13,9 +13,9 @@ type User struct {
 	Email        string    `json:"email"`
 	FullName     string    `json:"fullName"`
 	Role         string    `json:"role"`
-	Level        int       `json:"level"`
+	Level        int32     `json:"level"`
 	CreatedAt    time.Time `json:"created_at"`
-	Version      int       `json:"-"`
+	Version      int32     `json:"-"`
 }
 
 func (m *Models) InsertUser(user *User) error {

@@ -79,7 +79,7 @@ func (h *Handlers) GetRequesterMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (h *Handlers) AuthGuardMiddleware(levelRequired int) func(http.Handler) http.Handler {
+func (h *Handlers) AuthGuardMiddleware(levelRequired int32) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			requester, ok := r.Context().Value(requesterCtxKey).(*models.User)

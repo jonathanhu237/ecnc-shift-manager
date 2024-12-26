@@ -1,51 +1,59 @@
-package application
+package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		Username string `json:"username" validate:"required"`
-		Password string `json:"password" validate:"required"`
+		Username string `json:"username"`
+		Password string `json:"password"`
 	}
 
-	if err := app.readJSON(r, &payload); err != nil {
-		app.badRequest(w, r, err)
+	if err := h.readJSON(r, &payload); err != nil {
+		h.errorResponse(w, r, err)
 		return
 	}
-	if err := app.validate.Struct(payload); err != nil {
-		app.validateError(w, r, err)
+
+	// check the payload
+	switch {
+	case payload.Username == "":
+		h.errorResponse(w, r, errors.New("用户名为空"))
+		return
+	case payload.Password == "":
+		h.errorResponse(w, r, errors.New("密码为空"))
 		return
 	}
 
 	// get the user
-	user, err := app.models.Users.SelectUserByUsername(payload.Username)
+	user, err := h.models.SelectUserByUsername(payload.Username)
 	if err != nil {
 		switch {
-		case errors.Is(err, models.ErrRecordNotFound):
-			app.errorResponse(w, r, errInvalidLogin)
+		case errors.Is(err, sql.ErrNoRows):
+			h.errorResponse(w, r, errors.New("用户名不存在或密码错误"))
+			return
 		default:
-			app.internalSeverError(w, r, err)
+			h.internalServerError(w, r, err)
+			return
 		}
-		return
 	}
 
 	// check the password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(payload.Password)); err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
-			app.errorResponse(w, r, errInvalidLogin)
+			h.errorResponse(w, r, errors.New("用户名不存在或密码错误"))
+			return
 		default:
-			app.internalSeverError(w, r, err)
+			h.internalServerError(w, r, err)
+			return
 		}
-		return
 	}
 
 	// create jwt
@@ -58,9 +66,9 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte(app.config.JWTSecret))
+	ss, err := token.SignedString([]byte(h.config.JWTSecret))
 	if err != nil {
-		app.internalSeverError(w, r, err)
+		h.internalServerError(w, r, err)
 		return
 	}
 
@@ -72,18 +80,13 @@ func (app *Application) loginHandler(w http.ResponseWriter, r *http.Request) {
 		Expires:  expiresAt,
 		HttpOnly: true,
 	}
-
-	if app.config.Environment == "production" {
-		cookie.SameSite = http.SameSiteStrictMode
-	}
-
 	http.SetCookie(w, cookie)
 
 	// response
-	app.successResponse(w, r, "登录成功", user)
+	h.successResponse(w, r, "登录成功", user)
 }
 
-func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	// remove the token from the http-only cookie
 	cookie := &http.Cookie{
 		Name:    "__ecnc_shift_manager_token",
@@ -94,5 +97,5 @@ func (app *Application) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	// response
-	app.successResponse(w, r, "登出成功", nil)
+	h.successResponse(w, r, "登出成功", nil)
 }

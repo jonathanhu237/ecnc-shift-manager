@@ -3,91 +3,44 @@ package models
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 )
 
+// TODO: add version
 type User struct {
-	ID           int64  `json:"id"`
-	Username     string `json:"username"`
-	PasswordHash string `json:"-"`
-	Email        string `json:"email"`
-	FullName     string `json:"fullName"`
-	Role         string `json:"role"`
-	Level        int    `json:"level"`
+	ID           int64     `json:"id"`
+	Username     string    `json:"username"`
+	PasswordHash string    `json:"-"`
+	Email        string    `json:"email"`
+	FullName     string    `json:"fullName"`
+	Role         string    `json:"role"`
+	Level        int       `json:"level"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
-type UserModel struct {
-	DB *sql.DB
-}
-
-func (m *UserModel) CheckUserExists(username string) (bool, error) {
-	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM users WHERE username = $1)`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := m.DB.QueryRowContext(ctx, query, username).Scan(&exists); err != nil {
-		return false, err
-	}
-
-	return exists, nil
-}
-
-func (m *UserModel) CheckEmailExists(email string) (bool, error) {
-	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM users WHERE email = $1)`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := m.DB.QueryRowContext(ctx, query, email).Scan(&exists); err != nil {
-		return false, err
-	}
-
-	return exists, nil
-}
-
-func (m *UserModel) CheckBlackcoreExists() (bool, error) {
-	var exists bool
-	query := `
-		SELECT EXISTS (SELECT 1 FROM users WHERE role_id = (SELECT id FROM roles WHERE name = '黑心'))
-	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := m.DB.QueryRowContext(ctx, query).Scan(&exists); err != nil {
-		return false, err
-	}
-
-	return exists, nil
-}
-
-func (m *UserModel) InsertUser(user *User) error {
+func (m *Models) InsertUser(user *User) error {
 	query := `
 		INSERT INTO users (username, email, password_hash, full_name, role_id)
 		VALUES ($1, $2, $3, $4, (SELECT id FROM roles WHERE name = $5))
-		RETURNING id
+		RETURNING id, created_at
 	`
 	args := []any{user.Username, user.Email, user.PasswordHash, user.FullName, user.Role}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.ID); err != nil {
+	if err := m.db.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.CreatedAt); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
+func (m *Models) SelectUserByUsername(username string) (*User, error) {
 	user := &User{Username: username}
 
 	query := `
-		SELECT u.id, u.password_hash, u.email, u.full_name, r.name, r.level
+		SELECT u.id, u.password_hash, u.email, u.full_name, r.name, r.level, u.created_at
 		FROM users u
 		INNER JOIN roles r
 		ON u.role_id = r.id
@@ -97,30 +50,26 @@ func (m *UserModel) SelectUserByUsername(username string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := m.DB.QueryRowContext(ctx, query, username).Scan(
+	if err := m.db.QueryRowContext(ctx, query, username).Scan(
 		&user.ID,
 		&user.PasswordHash,
 		&user.Email,
 		&user.FullName,
 		&user.Role,
 		&user.Level,
+		&user.CreatedAt,
 	); err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
-		default:
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return user, nil
 }
 
-func (m *UserModel) SelectUserByID(userID int64) (*User, error) {
+func (m *Models) SelectUserByID(userID int64) (*User, error) {
 	user := &User{ID: userID}
 
 	query := `
-		SELECT u.username, u.password_hash, u.email, u.full_name, r.name, r.level
+		SELECT u.username, u.password_hash, u.email, u.full_name, r.name, r.level, u.created_at
 		FROM users AS u
 		INNER JOIN roles AS r
 		ON u.role_id = r.id
@@ -130,26 +79,22 @@ func (m *UserModel) SelectUserByID(userID int64) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := m.DB.QueryRowContext(ctx, query, userID).Scan(
+	if err := m.db.QueryRowContext(ctx, query, userID).Scan(
 		&user.Username,
 		&user.PasswordHash,
 		&user.Email,
 		&user.FullName,
 		&user.Role,
 		&user.Level,
+		&user.CreatedAt,
 	); err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
-		default:
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return user, nil
 }
 
-func (m *UserModel) UpdateUser(user *User) error {
+func (m *Models) UpdateUser(user *User) error {
 	query := `
 		UPDATE users
 		SET
@@ -167,24 +112,24 @@ func (m *UserModel) UpdateUser(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, err := m.DB.ExecContext(ctx, query, args...)
+	res, err := m.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
 
-	row, err := res.RowsAffected()
+	rows, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 
-	if row == 0 {
-		return ErrRecordNotFound
+	if rows == 0 {
+		return sql.ErrNoRows
 	}
 
 	return nil
 }
 
-func (m *UserModel) SelectUsers() ([]*User, error) {
+func (m *Models) SelectAllUsers() ([]*User, error) {
 	query := `
 		SELECT
 			u.id,
@@ -193,7 +138,8 @@ func (m *UserModel) SelectUsers() ([]*User, error) {
 			u.email,
 			u.full_name,
 			r.name,
-			r.level
+			r.level,
+			u.created_at
 		FROM users AS u
 		INNER JOIN roles AS r
 			ON u.role_id = r.id
@@ -203,7 +149,7 @@ func (m *UserModel) SelectUsers() ([]*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -220,6 +166,7 @@ func (m *UserModel) SelectUsers() ([]*User, error) {
 			&user.FullName,
 			&user.Role,
 			&user.Level,
+			&user.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -233,13 +180,13 @@ func (m *UserModel) SelectUsers() ([]*User, error) {
 	return users, nil
 }
 
-func (m *UserModel) DeleteUser(userID int64) error {
+func (m *Models) DeleteUser(userID int64) error {
 	query := `DELETE FROM users WHERE id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, err := m.DB.ExecContext(ctx, query, userID)
+	res, err := m.db.ExecContext(ctx, query, userID)
 	if err != nil {
 		return err
 	}
@@ -250,7 +197,7 @@ func (m *UserModel) DeleteUser(userID int64) error {
 	}
 
 	if rows == 0 {
-		return ErrRecordNotFound
+		return sql.ErrNoRows
 	}
 
 	return nil

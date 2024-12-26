@@ -44,7 +44,7 @@ func (seed *Seed) AddRandomUsers(n int) (int, error) {
 			return 0, err
 		}
 
-		if err := seed.models.Users.InsertUser(randomUser); err != nil {
+		if err := seed.models.InsertUser(randomUser); err != nil {
 			seed.logger.Error(
 				"failed to insert user",
 				slog.String("error", err.Error()),

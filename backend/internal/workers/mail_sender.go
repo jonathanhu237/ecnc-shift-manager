@@ -1,4 +1,4 @@
-package application
+package workers
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/config"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/wneessen/go-mail"
 )
@@ -16,15 +17,29 @@ type MailPayload struct {
 	Body    string `json:"body"`
 }
 
-func (app *Application) StartMailSender(ctx context.Context, ch *amqp.Channel) error {
+type MailSender struct {
+	config *config.Config
+	logger *slog.Logger
+	ch     *amqp.Channel
+}
+
+func NewMailSender(config *config.Config, logger *slog.Logger, ch *amqp.Channel) *MailSender {
+	return &MailSender{
+		config: config,
+		logger: logger,
+		ch:     ch,
+	}
+}
+
+func (ms *MailSender) Run(ctx context.Context) error {
 	// establish mail client
 	mailClient, err := mail.NewClient(
-		app.config.MailClient.SMTPHost,
+		ms.config.MailClient.SMTPHost,
 		mail.WithPort(465),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain),
 		mail.WithSSL(),
-		mail.WithUsername(app.config.MailClient.Sender),
-		mail.WithPassword(app.config.MailClient.Password),
+		mail.WithUsername(ms.config.MailClient.Sender),
+		mail.WithPassword(ms.config.MailClient.Password),
 	)
 	if err != nil {
 		return err
@@ -37,7 +52,7 @@ func (app *Application) StartMailSender(ctx context.Context, ch *amqp.Channel) e
 	}
 
 	// consume messages
-	msgs, err := ch.Consume("mail_queue", "", false, false, false, false, nil)
+	msgs, err := ms.ch.Consume("mail_queue", "", false, false, false, false, nil)
 	if err != nil {
 		return err
 	}
@@ -51,9 +66,9 @@ func (app *Application) StartMailSender(ctx context.Context, ch *amqp.Channel) e
 				// parse the message
 				var mailPayload MailPayload
 				if err := json.Unmarshal(d.Body, &mailPayload); err != nil {
-					app.logger.Error("failed to unmarshal mail", slog.String("error", err.Error()))
+					ms.logger.Error("failed to unmarshal mail", slog.String("error", err.Error()))
 					if err := d.Nack(false, false); err != nil {
-						app.logger.Error("failed to nack message", slog.String("error", err.Error()))
+						ms.logger.Error("failed to nack message", slog.String("error", err.Error()))
 					}
 					continue
 				}
@@ -62,31 +77,33 @@ func (app *Application) StartMailSender(ctx context.Context, ch *amqp.Channel) e
 				message := mail.NewMsg()
 				message.Subject(mailPayload.Subject)
 				message.SetBodyString(mail.TypeTextPlain, mailPayload.Body)
-				if err := message.From(app.config.MailClient.Sender); err != nil {
-					app.logger.Error("failed to set mail sender", slog.String("error", err.Error()))
+
+				if err := message.From(ms.config.MailClient.Sender); err != nil {
+					ms.logger.Error("failed to set mail sender", slog.String("error", err.Error()))
 					if err := d.Nack(false, false); err != nil {
-						app.logger.Error("failed to nack message", slog.String("error", err.Error()))
+						ms.logger.Error("failed to nack message", slog.String("error", err.Error()))
 					}
 					continue
 				}
+
 				if err := message.To(mailPayload.To); err != nil {
-					app.logger.Error("failed to set mail to", slog.String("error", err.Error()))
+					ms.logger.Error("failed to set mail to", slog.String("error", err.Error()))
 					if err := d.Nack(false, false); err != nil {
-						app.logger.Error("failed to nack message", slog.String("error", err.Error()))
+						ms.logger.Error("failed to nack message", slog.String("error", err.Error()))
 					}
 					continue
 				}
 
 				if err := mailClient.Send(message); err != nil {
-					app.logger.Error("failed to send mail", slog.String("error", err.Error()))
+					ms.logger.Error("failed to send mail", slog.String("error", err.Error()))
 					if err := d.Nack(false, true); err != nil {
-						app.logger.Error("failed to nack message", slog.String("error", err.Error()))
+						ms.logger.Error("failed to nack message", slog.String("error", err.Error()))
 					}
 					continue
 				}
 
 				if err := d.Ack(false); err != nil {
-					app.logger.Error("failed to ack message", slog.String("error", err.Error()))
+					ms.logger.Error("failed to ack message", slog.String("error", err.Error()))
 				}
 			}
 		}

@@ -26,7 +26,7 @@ func New(logger *slog.Logger) (*Seed, *sql.DB, error) {
 	}
 	seed.config = cfg
 
-	db, err := models.OpenDB(seed.config)
+	db, err := utils.OpenDB(seed.config)
 	if err != nil {
 		return nil, nil, err
 	}

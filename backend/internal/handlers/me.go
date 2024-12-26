@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 
@@ -61,8 +62,14 @@ func (h *Handlers) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 
 	requester.PasswordHash = string(newPasswordHash)
 	if err := h.models.UpdateUser(requester); err != nil {
-		h.internalServerError(w, r, err)
-		return
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			h.errorResponse(w, r, errors.New("发生了数据冲突，请重试"))
+			return
+		default:
+			h.internalServerError(w, r, err)
+			return
+		}
 	}
 
 	// response

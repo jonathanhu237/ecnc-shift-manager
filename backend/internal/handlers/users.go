@@ -180,7 +180,7 @@ func (h *Handlers) UpdateUserRole(w http.ResponseWriter, r *http.Request) {
 	if err := h.models.UpdateUser(user); err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			h.errorResponse(w, r, errors.New("用户已被修改或删除"))
+			h.errorResponse(w, r, errors.New("发生了数据冲突，请重试"))
 			return
 		default:
 			h.internalServerError(w, r, err)

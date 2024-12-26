@@ -106,11 +106,11 @@ func (m *Models) UpdateUser(user *User) error {
 				SELECT id
 				FROM roles
 				WHERE name = $3
-			)
+			),
 			version = version + 1
 		WHERE id = $4 AND version = $5
 	`
-	args := []any{user.PasswordHash, user.Email, user.Role, user.ID}
+	args := []any{user.PasswordHash, user.Email, user.Role, user.ID, user.Version}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

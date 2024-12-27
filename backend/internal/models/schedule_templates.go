@@ -7,7 +7,7 @@ import (
 )
 
 type ScheduleTemplateShift struct {
-	ID                 int64     `json:"id"`
+	ID                 int64     `json:"id,omitempty"`
 	DayOfWeek          int32     `json:"dayOfWeek"`
 	StartTime          time.Time `json:"startTime"`
 	EndTime            time.Time `json:"endTime"`
@@ -85,7 +85,7 @@ func (m *Models) InsertScheduleTemplate(name, description string) (*ScheduleTemp
 
 func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 	query := `
-		SELECT st.name, st.description, st.created_at, st.version, sts.id, sts.day_of_week, sts.start_time, sts.end_time, sts.assistants_required
+		SELECT st.name, st.description, st.created_at, st.version, sts.day_of_week, sts.start_time, sts.end_time, sts.assistants_required
 		FROM schedule_templates st
 		LEFT JOIN schedule_template_shifts sts ON st.id = sts.schedule_template_id
 		WHERE st.id = $1
@@ -110,7 +110,6 @@ func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 			stDescription         string
 			stCreatedAt           time.Time
 			stVersion             int32
-			stsID                 sql.NullInt64
 			stsDayOfWeek          sql.NullInt32
 			stsStartTime          sql.NullTime
 			stsEndTime            sql.NullTime
@@ -121,7 +120,6 @@ func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 			&stDescription,
 			&stCreatedAt,
 			&stVersion,
-			&stsID,
 			&stsDayOfWeek,
 			&stsStartTime,
 			&stsEndTime,
@@ -137,9 +135,8 @@ func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 			scheduleTemplate.Version = stVersion
 		}
 
-		if stsID.Valid && stsDayOfWeek.Valid && stsStartTime.Valid && stsEndTime.Valid && stsAssistantsRequired.Valid {
+		if stsDayOfWeek.Valid && stsStartTime.Valid && stsEndTime.Valid && stsAssistantsRequired.Valid {
 			sts := &ScheduleTemplateShift{
-				ID:                 stsID.Int64,
 				DayOfWeek:          stsDayOfWeek.Int32,
 				StartTime:          stsStartTime.Time,
 				EndTime:            stsEndTime.Time,
@@ -185,4 +182,58 @@ func (m *Models) UpdateScheduleTemplateMeta(st *ScheduleTemplate) error {
 	}
 
 	return nil
+}
+
+func (m *Models) UpdateScheduleTemplateShifts(st *ScheduleTemplate) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	tx, err := m.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	// delete all shifts
+	query := `DELETE FROM schedule_template_shifts WHERE schedule_template_id = $1`
+	if _, err := tx.ExecContext(ctx, query, st.ID); err != nil {
+		return err
+	}
+
+	// insert new shifts
+	query = `
+		INSERT INTO schedule_template_shifts (schedule_template_id, day_of_week, start_time, end_time, assistants_required)
+		VALUES ($1, $2, $3, $4, $5) 
+	`
+	for _, shift := range st.Shifts {
+		args := []any{st.ID, shift.DayOfWeek, shift.StartTime, shift.EndTime, shift.AssistantsRequired}
+
+		if _, err := tx.ExecContext(ctx, query, args...); err != nil {
+			return err
+		}
+	}
+
+	// update version
+	query = `
+		UPDATE schedule_templates
+		SET version = version + 1
+		WHERE id = $1 AND version = $2
+	`
+	res, err := m.db.ExecContext(ctx, query, st.ID, st.Version)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return tx.Commit()
 }

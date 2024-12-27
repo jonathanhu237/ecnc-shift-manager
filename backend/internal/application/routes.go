@@ -47,6 +47,7 @@ func (app *Application) routes() http.Handler {
 				r.Use(app.handler.GetScheduleTemplateMiddleware)
 				r.Get("/", app.handler.GetScheduleTemplate)
 				r.Post("/update-description", app.handler.UpdateScheduleTemplateDescription)
+				r.Post("/update-shifts", app.handler.UpdateScheduleTemplateShifts)
 			})
 		})
 	})

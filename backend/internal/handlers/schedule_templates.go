@@ -7,6 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
 )
 
 func (h *Handlers) GetAllScheduleTemplates(w http.ResponseWriter, r *http.Request) {
@@ -84,6 +85,46 @@ func (h *Handlers) UpdateScheduleTemplateDescription(w http.ResponseWriter, r *h
 	scheduleTemplate.Description = payload.Description
 
 	if err := h.models.UpdateScheduleTemplateMeta(scheduleTemplate); err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			h.errorResponse(w, r, errors.New("班表模板已被修改或删除，请重试"))
+			return
+		default:
+			h.internalServerError(w, r, err)
+			return
+		}
+	}
+
+	h.successResponse(w, r, "更新班表模板成功", scheduleTemplate)
+}
+
+func (h *Handlers) UpdateScheduleTemplateShifts(w http.ResponseWriter, r *http.Request) {
+	scheduleTemplate, ok := r.Context().Value(scheduleTemplateKey).(*models.ScheduleTemplate)
+	if !ok {
+		h.internalServerError(w, r, errors.New("UpdateScheduleTemplateShifts must be called after GetScheduleTemplateMiddleware"))
+		return
+	}
+
+	var payload struct {
+		Shifts []*models.ScheduleTemplateShift `json:"shifts"`
+	}
+
+	if err := h.readJSON(r, &payload); err != nil {
+		h.errorResponse(w, r, err)
+		return
+	}
+	if payload.Shifts == nil {
+		h.errorResponse(w, r, errors.New("班次为空"))
+		return
+	}
+
+	if err := utils.ValidateShifts(payload.Shifts); err != nil {
+		h.errorResponse(w, r, err)
+		return
+	}
+
+	scheduleTemplate.Shifts = payload.Shifts
+	if err := h.models.UpdateScheduleTemplateShifts(scheduleTemplate); err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			h.errorResponse(w, r, errors.New("班表模板已被修改或删除，请重试"))

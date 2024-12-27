@@ -159,3 +159,30 @@ func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 
 	return scheduleTemplate, nil
 }
+
+func (m *Models) UpdateScheduleTemplateMeta(st *ScheduleTemplate) error {
+	query := `
+		UPDATE schedule_templates
+		SET description = $1, version = version + 1
+		WHERE id = $2 AND version = $3
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, err := m.db.ExecContext(ctx, query, st.Description, st.ID, st.Version)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}

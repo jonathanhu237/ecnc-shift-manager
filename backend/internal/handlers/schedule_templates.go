@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 
@@ -63,4 +64,35 @@ func (h *Handlers) GetScheduleTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.successResponse(w, r, "获取班表模板成功", scheduleTemplate)
+}
+
+func (h *Handlers) UpdateScheduleTemplateDescription(w http.ResponseWriter, r *http.Request) {
+	scheduleTemplate, ok := r.Context().Value(scheduleTemplateKey).(*models.ScheduleTemplate)
+	if !ok {
+		h.internalServerError(w, r, errors.New("UpdateScheduleTemplateDescription must be called after GetScheduleTemplateMiddleware"))
+		return
+	}
+
+	var payload struct {
+		Description string `json:"description"`
+	}
+
+	if err := h.readJSON(r, &payload); err != nil {
+		h.errorResponse(w, r, err)
+		return
+	}
+	scheduleTemplate.Description = payload.Description
+
+	if err := h.models.UpdateScheduleTemplateMeta(scheduleTemplate); err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			h.errorResponse(w, r, errors.New("班表模板已被修改或删除，请重试"))
+			return
+		default:
+			h.internalServerError(w, r, err)
+			return
+		}
+	}
+
+	h.successResponse(w, r, "更新班表模板成功", scheduleTemplate)
 }

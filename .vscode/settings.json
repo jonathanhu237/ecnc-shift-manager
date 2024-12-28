@@ -1,9 +1,13 @@
 {
   "cSpell.words": [
     "amqp",
+    "dbpool",
     "ecnc",
+    "gofiber",
     "jackc",
     "pgconn",
+    "pgxpool",
+    "sslmode",
     "stdlib"
   ]
 }

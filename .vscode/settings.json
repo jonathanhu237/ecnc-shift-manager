@@ -7,6 +7,7 @@
     "jackc",
     "jwtware",
     "pgconn",
+    "pgtype",
     "pgxpool",
     "sslmode",
     "stdlib"

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS schedule_templates (
     id BIGSERIAL PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

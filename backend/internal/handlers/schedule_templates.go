@@ -3,9 +3,11 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
+	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
 )
 
 func (h *Handlers) GetAllScheduleTemplateMeta(w http.ResponseWriter, r *http.Request) {
@@ -22,6 +24,12 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 	var payload struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
+		Shifts      []struct {
+			DayOfWeek          int32     `json:"dayOfWeek"`
+			StartTime          time.Time `json:"startTime"`
+			EndTime            time.Time `json:"endTime"`
+			AssistantsRequired int32     `json:"assistantsRequired"`
+		} `json:"shifts"`
 	}
 
 	if err := h.readJSON(r, &payload); err != nil {
@@ -38,6 +46,20 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 		Name:        payload.Name,
 		Description: payload.Description,
 		Shifts:      []*models.ScheduleTemplateShift{},
+	}
+
+	for _, shift := range payload.Shifts {
+		shift := &models.ScheduleTemplateShift{
+			DayOfWeek:          shift.DayOfWeek,
+			StartTime:          shift.StartTime,
+			EndTime:            shift.EndTime,
+			AssistantsRequired: shift.AssistantsRequired,
+		}
+		template.Shifts = append(template.Shifts, shift)
+	}
+	if err := utils.ValidateShifts(template.Shifts); err != nil {
+		h.errorResponse(w, r, err)
+		return
 	}
 
 	if err := h.models.InsertScheduleTemplate(template); err != nil {

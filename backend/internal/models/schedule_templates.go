@@ -9,7 +9,7 @@ import (
 )
 
 type ScheduleTemplateShift struct {
-	ID                 int64     `json:"id,omitempty"`
+	ID                 int64     `json:"id"`
 	DayOfWeek          int32     `json:"dayOfWeek"`
 	StartTime          time.Time `json:"startTime"`
 	EndTime            time.Time `json:"endTime"`
@@ -119,15 +119,34 @@ func (m *Models) InsertScheduleTemplate(st *ScheduleTemplate) error {
 }
 
 func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
+	// query the meta first
 	query := `
-		SELECT st.name, st.description, st.created_at, st.version, sts.day_of_week, sts.start_time, sts.end_time, sts.assistants_required
-		FROM schedule_templates st
-		LEFT JOIN schedule_template_shifts sts ON st.id = sts.schedule_template_id
-		WHERE st.id = $1
+		SELECT id, name, description, created_at, version
+		FROM schedule_templates
+		WHERE id = $1
 	`
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
+
+	st := &ScheduleTemplate{}
+	if err := m.db.QueryRowContext(ctx, query, id).Scan(
+		&st.ID,
+		&st.Name,
+		&st.Description,
+		&st.CreatedAt,
+		&st.Version,
+	); err != nil {
+		return nil, err
+	}
+
+	// query the shifts
+	query = `
+		SELECT id, day_of_week, start_time, end_time, assistants_required
+		FROM schedule_template_shifts
+		WHERE schedule_template_id = $1
+		ORDER BY day_of_week, start_time
+	`
 
 	rows, err := m.db.QueryContext(ctx, query, id)
 	if err != nil {
@@ -135,61 +154,28 @@ func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 	}
 	defer rows.Close()
 
-	scheduleTemplate := &ScheduleTemplate{
-		ID:     id,
-		Shifts: make([]*ScheduleTemplateShift, 0),
-	}
+	st.Shifts = make([]*ScheduleTemplateShift, 0)
 	for rows.Next() {
-		var (
-			stName                string
-			stDescription         string
-			stCreatedAt           time.Time
-			stVersion             int32
-			stsDayOfWeek          sql.NullInt32
-			stsStartTime          sql.NullTime
-			stsEndTime            sql.NullTime
-			stsAssistantsRequired sql.NullInt32
-		)
+		shift := &ScheduleTemplateShift{}
+
 		if err := rows.Scan(
-			&stName,
-			&stDescription,
-			&stCreatedAt,
-			&stVersion,
-			&stsDayOfWeek,
-			&stsStartTime,
-			&stsEndTime,
-			&stsAssistantsRequired,
+			&shift.ID,
+			&shift.DayOfWeek,
+			&shift.StartTime,
+			&shift.EndTime,
+			&shift.AssistantsRequired,
 		); err != nil {
 			return nil, err
 		}
 
-		if scheduleTemplate.Name == "" {
-			scheduleTemplate.Name = stName
-			scheduleTemplate.Description = stDescription
-			scheduleTemplate.CreatedAt = stCreatedAt
-			scheduleTemplate.Version = stVersion
-		}
-
-		if stsDayOfWeek.Valid && stsStartTime.Valid && stsEndTime.Valid && stsAssistantsRequired.Valid {
-			sts := &ScheduleTemplateShift{
-				DayOfWeek:          stsDayOfWeek.Int32,
-				StartTime:          stsStartTime.Time,
-				EndTime:            stsEndTime.Time,
-				AssistantsRequired: stsAssistantsRequired.Int32,
-			}
-			scheduleTemplate.Shifts = append(scheduleTemplate.Shifts, sts)
-		}
+		st.Shifts = append(st.Shifts, shift)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	if scheduleTemplate.Name == "" {
-		return nil, sql.ErrNoRows
-	}
-
-	return scheduleTemplate, nil
+	return st, nil
 }
 
 func (m *Models) UpdateScheduleTemplateMeta(st *ScheduleTemplate) error {

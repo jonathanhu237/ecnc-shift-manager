@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
 )
@@ -96,8 +97,14 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 
 	// insert the schedule template into the database
 	if err := h.models.InsertScheduleTemplate(st); err != nil {
-		h.internalServerError(w, r, err)
-		return
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.ConstraintName == "schedule_templates_name_key" {
+			h.errorResponse(w, r, errors.New("班表模板名字重复"))
+			return
+		} else {
+			h.internalServerError(w, r, err)
+			return
+		}
 	}
 
 	h.successResponse(w, r, "班表模板创建成功", st)

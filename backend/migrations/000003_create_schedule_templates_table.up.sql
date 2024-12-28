@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS schedule_template_shifts (
     schedule_template_id BIGINT NOT NULL REFERENCES schedule_templates(id) ON DELETE CASCADE,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    required_assistant INTEGER NOT NULL
+    required_assistants INTEGER NOT NULL
 );
 
 CREATE TABLE schedule_template_shifts_availability (

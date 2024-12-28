@@ -122,29 +122,3 @@ func (h *Handlers) GetUserMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
-func (h *Handlers) GetScheduleTemplateMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		scheduleTemplateIDParam := chi.URLParam(r, "scheduleTemplateID")
-		scheduleTemplateID, err := strconv.ParseInt(scheduleTemplateIDParam, 10, 64)
-		if err != nil {
-			h.errorResponse(w, r, errors.New("无效的班表模板ID"))
-			return
-		}
-
-		scheduleTemplate, err := h.models.SelectScheduleTemplate(scheduleTemplateID)
-		if err != nil {
-			switch {
-			case errors.Is(err, sql.ErrNoRows):
-				h.errorResponse(w, r, errors.New("班表模板不存在"))
-				return
-			default:
-				h.internalServerError(w, r, err)
-				return
-			}
-		}
-
-		ctx := context.WithValue(r.Context(), scheduleTemplateKey, scheduleTemplate)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}

@@ -6,11 +6,11 @@ import (
 )
 
 type ScheduleTemplateShift struct {
-	ID                 int64     `json:"id"`
-	StartTime          time.Time `json:"startTime"`
-	EndTime            time.Time `json:"endTime"`
-	RequiredAssistants int32     `json:"requiredAssistants"`
-	ApplicableDays     []int32   `json:"applicableDays"`
+	ID                 int64   `json:"id"`
+	StartTime          string  `json:"startTime"`
+	EndTime            string  `json:"endTime"`
+	RequiredAssistants int32   `json:"requiredAssistants"`
+	ApplicableDays     []int32 `json:"applicableDays"`
 }
 
 type ScheduleTemplate struct {
@@ -139,6 +139,8 @@ func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 		if err := rows.Err(); err != nil {
 			return nil, err
 		}
+
+		st.Shifts = append(st.Shifts, sts)
 	}
 
 	if err := rows.Err(); err != nil {

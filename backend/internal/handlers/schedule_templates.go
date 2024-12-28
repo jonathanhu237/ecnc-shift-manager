@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -69,22 +68,13 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 		Shifts:      make([]*models.ScheduleTemplateShift, 0, len(payload.Shifts)),
 	}
 
-	for id, shift := range payload.Shifts {
-		sts := &models.ScheduleTemplateShift{}
-
-		startTime, err := time.Parse("15:04:05", shift.StartTime)
-		if err != nil {
-			h.errorResponse(w, r, fmt.Errorf("班次 %d 的开始时间格式错误", id))
-			return
+	for _, shift := range payload.Shifts {
+		sts := &models.ScheduleTemplateShift{
+			StartTime:          shift.StartTime,
+			EndTime:            shift.EndTime,
+			RequiredAssistants: shift.RequiredAssistants,
+			ApplicableDays:     shift.ApplicableDays,
 		}
-		sts.StartTime = startTime
-
-		endTime, err := time.Parse("15:04:05", shift.EndTime)
-		if err != nil {
-			h.errorResponse(w, r, fmt.Errorf("班次 %d 的结束时间格式错误", id))
-			return
-		}
-		sts.EndTime = endTime
 
 		sts.RequiredAssistants = shift.RequiredAssistants
 		sts.ApplicableDays = shift.ApplicableDays

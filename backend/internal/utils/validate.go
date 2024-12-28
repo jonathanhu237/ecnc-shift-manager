@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"net/mail"
+	"time"
 
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 )
@@ -18,17 +19,30 @@ func IsValidRole(role string) bool {
 
 func ValidateScheduleTemplate(st *models.ScheduleTemplate) error {
 	for i := 0; i < len(st.Shifts); i++ {
-		if st.Shifts[i].StartTime.After(st.Shifts[i].EndTime) {
+		startTime, err := time.Parse("15:04:05", st.Shifts[i].StartTime)
+		if err != nil {
+			return fmt.Errorf("班次 %d 的开始时间格式无效", i)
+		}
+		endTime, err := time.Parse("15:04:05", st.Shifts[i].EndTime)
+		if err != nil {
+			return fmt.Errorf("班次 %d 的结束时间格式无效", i)
+		}
+		if startTime.After(endTime) {
 			return fmt.Errorf("班次 %d 的开始时间晚于结束时间", i)
 		}
 	}
 
 	for i := 0; i < len(st.Shifts); i++ {
 		for j := i + 1; j < len(st.Shifts); j++ {
-			if !(st.Shifts[i].EndTime.Before(st.Shifts[j].StartTime) ||
-				st.Shifts[i].EndTime.Equal(st.Shifts[j].StartTime) ||
-				st.Shifts[i].StartTime.After(st.Shifts[j].EndTime) ||
-				st.Shifts[i].StartTime.Equal(st.Shifts[j].EndTime)) {
+			iEndTime, _ := time.Parse("15:04:05", st.Shifts[i].EndTime)
+			jStartTime, _ := time.Parse("15:04:05", st.Shifts[j].StartTime)
+			iStartTime, _ := time.Parse("15:04:05", st.Shifts[i].StartTime)
+			jEndTime, _ := time.Parse("15:04:05", st.Shifts[j].EndTime)
+
+			if !(iEndTime.Before(jStartTime) ||
+				iEndTime.Equal(jStartTime) ||
+				iStartTime.After(jEndTime) ||
+				iStartTime.Equal(jEndTime)) {
 				return fmt.Errorf("班次 %d 与班次 %d 有时间冲突", i, j)
 			}
 		}

@@ -42,6 +42,7 @@ func (app *Application) routes() http.Handler {
 		r.Route("/schedule-templates", func(r chi.Router) {
 			r.Use(app.handler.AuthGuardMiddleware(blackCoreLevel))
 			r.Post("/", app.handler.CreateScheduleTemplate)
+			r.Get("/{scheduleTemplateID}", app.handler.GetScheduleTemplates)
 		})
 	})
 

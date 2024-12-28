@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
@@ -108,4 +111,26 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 	}
 
 	h.successResponse(w, r, "班表模板创建成功", st)
+}
+
+func (h *Handlers) GetScheduleTemplates(w http.ResponseWriter, r *http.Request) {
+	scheduleTemplateIDAsString := chi.URLParam(r, "scheduleTemplateID")
+	scheduleTemplateID, err := strconv.ParseInt(scheduleTemplateIDAsString, 10, 64)
+	if err != nil {
+		h.errorResponse(w, r, errors.New("班表模板 ID 非法"))
+		return
+	}
+
+	sts, err := h.models.SelectScheduleTemplate(scheduleTemplateID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			h.errorResponse(w, r, errors.New("班表模板不存在"))
+			return
+		} else {
+			h.internalServerError(w, r, err)
+			return
+		}
+	}
+
+	h.successResponse(w, r, "班表模板获取成功", sts)
 }

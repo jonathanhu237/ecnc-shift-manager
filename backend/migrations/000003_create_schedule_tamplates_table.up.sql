@@ -11,5 +11,6 @@ CREATE TABLE IF NOT EXISTS schedule_template_shifts (
     day_of_week INTEGER NOT NULL,
     start_time TIME WITH TIME ZONE NOT NULL,
     end_time TIME WITH TIME ZONE NOT NULL,
-    assistants_required INTEGER NOT NULL
+    assistants_required INTEGER NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1
 );

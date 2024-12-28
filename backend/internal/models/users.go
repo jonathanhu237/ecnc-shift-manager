@@ -75,7 +75,7 @@ func (m *Models) SelectUserByID(userID int64) (*User, error) {
 
 	query := `
 		SELECT 
-			u.id, 
+			u.username, 
 			u.password_hash, 
 			u.email, 
 			u.full_name, 
@@ -115,7 +115,7 @@ func (m *Models) UpdateUser(user *User) error {
 				SELECT id
 				FROM roles
 				WHERE name = $3
-			),
+			)
 		WHERE id = $4
 	`
 	args := []any{user.PasswordHash, user.Email, user.Role, user.ID}
@@ -151,7 +151,6 @@ func (m *Models) SelectAllUsers() ([]*User, error) {
 			r.name,
 			r.level,
 			u.created_at
-			u.version
 		FROM users AS u
 		INNER JOIN roles AS r ON u.role_id = r.id
 		ORDER BY u.created_at

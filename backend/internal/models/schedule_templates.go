@@ -47,11 +47,6 @@ func (m *Models) InsertScheduleTemplate(st *ScheduleTemplate) error {
 
 	// insert the shifts
 	for _, shift := range st.Shifts {
-		sts := &ScheduleTemplateShift{
-			StartTime:          shift.StartTime,
-			EndTime:            shift.EndTime,
-			RequiredAssistants: shift.RequiredAssistants,
-		}
 		query := `
 			INSERT INTO 
 				schedule_template_shifts (
@@ -63,7 +58,7 @@ func (m *Models) InsertScheduleTemplate(st *ScheduleTemplate) error {
 			VALUES ($1, $2, $3, $4)
 			RETURNING id
 		`
-		if err := tx.QueryRowContext(ctx, query, st.ID, sts.StartTime, sts.EndTime, sts.RequiredAssistants).Scan(&sts.ID); err != nil {
+		if err := tx.QueryRowContext(ctx, query, st.ID, shift.StartTime, shift.EndTime, shift.RequiredAssistants).Scan(&shift.ID); err != nil {
 			return err
 		}
 
@@ -73,7 +68,7 @@ func (m *Models) InsertScheduleTemplate(st *ScheduleTemplate) error {
 				INSERT INTO schedule_template_shifts_availability (schedule_template_shift_id, day_of_week)
 				VALUES ($1, $2)
 			`
-			if _, err := tx.ExecContext(ctx, query, sts.ID, day); err != nil {
+			if _, err := tx.ExecContext(ctx, query, shift.ID, day); err != nil {
 				return err
 			}
 		}

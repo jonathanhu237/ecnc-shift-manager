@@ -36,8 +36,13 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 	}
 
 	// insert the template
-	template, err := h.models.InsertScheduleTemplate(payload.Name, payload.Description)
-	if err != nil {
+	template := &models.ScheduleTemplate{
+		Name:        payload.Name,
+		Description: payload.Description,
+		Shifts:      []*models.ScheduleTemplateShift{},
+	}
+
+	if err := h.models.InsertScheduleTemplate(template); err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			switch {

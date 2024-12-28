@@ -3,6 +3,8 @@ package models
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -20,7 +22,7 @@ type ScheduleTemplate struct {
 	Description string                   `json:"description"`
 	Shifts      []*ScheduleTemplateShift `json:"shifts,omitempty"`
 	CreatedAt   time.Time                `json:"createdAt"`
-	Version     int32                    `json:"-"`
+	Version     int32                    `json:"version"`
 }
 
 func (m *Models) SelectScheduleTemplates() ([]*ScheduleTemplate, error) {
@@ -62,25 +64,58 @@ func (m *Models) SelectScheduleTemplates() ([]*ScheduleTemplate, error) {
 	return scheduleTemplates, nil
 }
 
-func (m *Models) InsertScheduleTemplate(name, description string) (*ScheduleTemplate, error) {
+func (m *Models) InsertScheduleTemplate(st *ScheduleTemplate) error {
+	// begin a transaction
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	tx, err := m.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	// insert the schedule template meta (e.g. title and description)
 	query := `
 		INSERT INTO schedule_templates (name, description)
 		VALUES ($1, $2)
-		RETURNING id, created_at
+		RETURNING id, created_at, version
 	`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	st := &ScheduleTemplate{
-		Name:        name,
-		Description: description,
-	}
-	if err := m.db.QueryRowContext(ctx, query, st.Name, st.Description).Scan(&st.ID, &st.CreatedAt); err != nil {
-		return nil, err
+	if err := tx.QueryRowContext(ctx, query, st.Name, st.Description).Scan(&st.ID, &st.CreatedAt, &st.Version); err != nil {
+		return err
 	}
 
-	return st, nil
+	// insert the schedule template shifts
+	if len(st.Shifts) == 0 {
+		return tx.Commit()
+	}
+
+	var placeholders []string
+	var params []interface{}
+
+	for id, shift := range st.Shifts {
+		placeholders = append(placeholders, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d)", id*5+1, id*5+2, id*5+3, id*5+4, id*5+5))
+		params = append(params, st.ID, shift.DayOfWeek, shift.StartTime, shift.EndTime, shift.AssistantsRequired)
+	}
+
+	query = fmt.Sprintf(`
+		INSERT INTO schedule_template_shifts (
+			schedule_template_id,
+			day_of_week,
+			start_time,
+			end_time,
+			assistants_required
+		) VALUES %s
+	`, strings.Join(placeholders, ", "))
+	_, err = tx.ExecContext(ctx, query, params...)
+	if err != nil {
+		return err
+	}
+
+	// commit
+	return tx.Commit()
 }
 
 func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {

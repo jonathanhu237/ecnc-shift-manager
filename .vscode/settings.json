@@ -5,6 +5,7 @@
     "ecnc",
     "gofiber",
     "jackc",
+    "jwtware",
     "pgconn",
     "pgxpool",
     "sslmode",

@@ -20,12 +20,12 @@ type ScheduleTemplate struct {
 	ID          int64                    `json:"id"`
 	Name        string                   `json:"name"`
 	Description string                   `json:"description"`
-	Shifts      []*ScheduleTemplateShift `json:"shifts,omitempty"`
+	Shifts      []*ScheduleTemplateShift `json:"shifts"`
 	CreatedAt   time.Time                `json:"createdAt"`
 	Version     int32                    `json:"version"`
 }
 
-func (m *Models) SelectScheduleTemplates() ([]*ScheduleTemplate, error) {
+func (m *Models) SelectAllScheduleTemplateMeta() ([]*ScheduleTemplate, error) {
 	query := `
 		SELECT id, name, description, created_at
 		FROM schedule_templates

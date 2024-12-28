@@ -10,14 +10,14 @@ import (
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
 )
 
-func (h *Handlers) GetAllScheduleTemplates(w http.ResponseWriter, r *http.Request) {
-	templates, err := h.models.SelectScheduleTemplates()
+func (h *Handlers) GetAllScheduleTemplateMeta(w http.ResponseWriter, r *http.Request) {
+	templates, err := h.models.SelectAllScheduleTemplateMeta()
 	if err != nil {
 		h.internalServerError(w, r, err)
 		return
 	}
 
-	h.successResponse(w, r, "获取班表模板成功", templates)
+	h.successResponse(w, r, "获取所有班表模板元数据成功", templates)
 }
 
 func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request) {

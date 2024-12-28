@@ -15,21 +15,20 @@ type User struct {
 	Role         string    `json:"role"`
 	Level        int32     `json:"level"`
 	CreatedAt    time.Time `json:"created_at"`
-	Version      int32     `json:"-"`
 }
 
 func (m *Models) InsertUser(user *User) error {
 	query := `
 		INSERT INTO users (username, email, password_hash, full_name, role_id)
 		VALUES ($1, $2, $3, $4, (SELECT id FROM roles WHERE name = $5))
-		RETURNING id, (SELECT level FROM roles WHERE name = $5), created_at, version
+		RETURNING id, (SELECT level FROM roles WHERE name = $5), created_at
 	`
 	args := []any{user.Username, user.Email, user.PasswordHash, user.FullName, user.Role}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := m.db.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.Level, &user.CreatedAt, &user.Version); err != nil {
+	if err := m.db.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.Level, &user.CreatedAt); err != nil {
 		return err
 	}
 
@@ -40,11 +39,17 @@ func (m *Models) SelectUserByUsername(username string) (*User, error) {
 	user := &User{Username: username}
 
 	query := `
-		SELECT u.id, u.password_hash, u.email, u.full_name, r.name, r.level, u.created_at, u.version
+		SELECT 
+			u.id, 
+			u.password_hash, 
+			u.email, 
+			u.full_name, 
+			r.name, 
+			r.level, 
+			u.created_at
 		FROM users u
-		INNER JOIN roles r
-		ON u.role_id = r.id
-		WHERE username = $1
+			INNER JOIN roles r ON u.role_id = r.id
+		WHERE u.username = $1
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -58,7 +63,6 @@ func (m *Models) SelectUserByUsername(username string) (*User, error) {
 		&user.Role,
 		&user.Level,
 		&user.CreatedAt,
-		&user.Version,
 	); err != nil {
 		return nil, err
 	}
@@ -70,10 +74,16 @@ func (m *Models) SelectUserByID(userID int64) (*User, error) {
 	user := &User{ID: userID}
 
 	query := `
-		SELECT u.username, u.password_hash, u.email, u.full_name, r.name, r.level, u.created_at, u.version
-		FROM users AS u
-		INNER JOIN roles AS r
-		ON u.role_id = r.id
+		SELECT 
+			u.id, 
+			u.password_hash, 
+			u.email, 
+			u.full_name, 
+			r.name, 
+			r.level, 
+			u.created_at
+		FROM users u
+			INNER JOIN roles r ON u.role_id = r.id
 		WHERE u.id = $1
 	`
 
@@ -88,7 +98,6 @@ func (m *Models) SelectUserByID(userID int64) (*User, error) {
 		&user.Role,
 		&user.Level,
 		&user.CreatedAt,
-		&user.Version,
 	); err != nil {
 		return nil, err
 	}
@@ -107,10 +116,9 @@ func (m *Models) UpdateUser(user *User) error {
 				FROM roles
 				WHERE name = $3
 			),
-			version = version + 1
-		WHERE id = $4 AND version = $5
+		WHERE id = $4
 	`
-	args := []any{user.PasswordHash, user.Email, user.Role, user.ID, user.Version}
+	args := []any{user.PasswordHash, user.Email, user.Role, user.ID}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -145,8 +153,7 @@ func (m *Models) SelectAllUsers() ([]*User, error) {
 			u.created_at
 			u.version
 		FROM users AS u
-		INNER JOIN roles AS r
-			ON u.role_id = r.id
+		INNER JOIN roles AS r ON u.role_id = r.id
 		ORDER BY u.created_at
 	`
 
@@ -171,7 +178,6 @@ func (m *Models) SelectAllUsers() ([]*User, error) {
 			&user.Role,
 			&user.Level,
 			&user.CreatedAt,
-			&user.Version,
 		); err != nil {
 			return nil, err
 		}

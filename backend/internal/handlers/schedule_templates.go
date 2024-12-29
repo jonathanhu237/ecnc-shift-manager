@@ -134,3 +134,19 @@ func (h *Handlers) GetAllScheduleTemplateMeta(w http.ResponseWriter, r *http.Req
 
 	h.successResponse(w, r, "班表模板元数据获取成功", sts)
 }
+
+func (h *Handlers) DeleteScheduleTemplate(w http.ResponseWriter, r *http.Request) {
+	scheduleTemplateIDAsString := chi.URLParam(r, "scheduleTemplateID")
+	scheduleTemplateID, err := strconv.ParseInt(scheduleTemplateIDAsString, 10, 64)
+	if err != nil {
+		h.errorResponse(w, r, errors.New("班表模板 ID 非法"))
+		return
+	}
+
+	if err := h.models.DeleteScheduleTemplate(scheduleTemplateID); err != nil {
+		h.internalServerError(w, r, err)
+		return
+	}
+
+	h.successResponse(w, r, "班表模板删除成功", nil)
+}

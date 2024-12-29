@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -182,4 +183,27 @@ func (m *Models) SelectAllScheduleTemplateMeta() ([]*ScheduleTemplate, error) {
 	}
 
 	return sts, nil
+}
+
+func (m *Models) DeleteScheduleTemplate(id int64) error {
+	query := `
+		DELETE FROM schedule_templates WHERE id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	res, err := m.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

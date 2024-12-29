@@ -14,7 +14,7 @@ type User struct {
 	FullName     string    `json:"fullName"`
 	Role         string    `json:"role"`
 	Level        int32     `json:"level"`
-	CreatedAt    time.Time `json:"created_at"`
+	CreatedAt    time.Time `json:"createdAt"`
 	Version      int32     `json:"version"`
 }
 

@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { format } from "date-fns";
 
 export default function ScheduleTemplateMetaTable() {
   const { data, isPending, isError, error } = useQuery({
@@ -23,22 +25,39 @@ export default function ScheduleTemplateMetaTable() {
         .get<APIResponse<ScheduleTemplateMetaType[]>>("/schedule-template-meta")
         .then((res) => res.data.data),
   });
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const columns: ColumnDef<ScheduleTemplateMetaType>[] = [
     {
       accessorKey: "name",
-      header: "模板名",
+      header: () => <div className="text-center">模板名</div>,
+      cell: ({ row }) => (
+        <div className="text-center text-nowrap">{row.original.name}</div>
+      ),
     },
     {
       accessorKey: "description",
-      header: "模板描述",
+      header: () => <div className="text-center">模板描述</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.original.description}</div>
+      ),
     },
     {
       accessorKey: "createdAt",
-      header: "模板创建时间",
+      header: () => <div className="text-center">模板创建时间</div>,
+      cell: ({ row }) => {
+        const createdAt = row.original.createdAt;
+        const formattedDate = format(
+          new Date(createdAt),
+          "yyyy-MM-dd HH:mm:ss"
+        );
+
+        return <div className="text-center text-nowrap">{formattedDate}</div>;
+      },
     },
     {
       id: "action",
+      header: () => <div className="text-center">操作</div>,
       cell: () => {
         return (
           <DropdownMenu>
@@ -72,7 +91,13 @@ export default function ScheduleTemplateMetaTable() {
 
   return (
     <>
-      <DataTable columns={columns} data={data} />
+      <DataTable
+        columns={columns}
+        data={data}
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+        actions={<Button>创建班表模板</Button>}
+      />
     </>
   );
 }

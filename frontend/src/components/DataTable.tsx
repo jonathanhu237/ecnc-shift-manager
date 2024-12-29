@@ -2,6 +2,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
@@ -16,16 +17,23 @@ import {
   TableRow,
 } from "./ui/table";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import React, { useState } from "react";
+import { Input } from "./ui/input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  globalFilter: string;
+  setGlobalFilter: (value: string) => void;
+  actions?: React.ReactNode;
 }
 
 export default function DataTable<TData, TValue>({
   columns,
   data,
+  globalFilter,
+  setGlobalFilter,
+  actions,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -36,13 +44,25 @@ export default function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
+      globalFilter,
     },
   });
 
   return (
-    <div>
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center pb-4">
+        <Input
+          placeholder="全局搜索"
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="max-w-sm"
+        />
+        {actions && <div className="flex gap-2">{actions}</div>}
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -93,7 +113,7 @@ export default function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex-1 flex items-end justify-end space-x-2">
         <Button
           variant="outline"
           size="sm"

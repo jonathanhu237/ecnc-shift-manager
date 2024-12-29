@@ -1,9 +1,14 @@
 import { api, APIResponse } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
 import { UserType } from "@/types/user";
+import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import DataTable from "./DataTable";
+import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+import CreateUserDialog from "./CreateUserDialog";
+import DataTable from "./DataTable";
+import DeleteUserDialog from "./DeleteUserDialog";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
 import UpdateUserRoleDialog from "./UpdateUserRoleDialog";
-import DeleteUserDialog from "./DeleteUserDialog";
-import CreateUserDialog from "./CreateUserDialog";
+import { format } from "date-fns";
 
 export default function UsersTable() {
   const { data, isPending, isError, error } = useQuery({
@@ -25,6 +26,7 @@ export default function UsersTable() {
     queryFn: () =>
       api.get<APIResponse<UserType[]>>("/users").then((res) => res.data.data),
   });
+  const [globalFilter, setGlobalFilter] = useState("");
   const [updateRoleDialogOpen, setUpdateRoleDialogOpen] = useState(false);
   const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
@@ -33,82 +35,80 @@ export default function UsersTable() {
   const columns: ColumnDef<UserType>[] = [
     {
       accessorKey: "username",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-            }}
-          >
-            用户名
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
+      header: () => <div className="text-center">用户名</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.original.username}</div>
+      ),
     },
     {
       accessorKey: "fullName",
-      header: "姓名",
+      header: () => <div className="text-center">姓名</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.original.fullName}</div>
+      ),
     },
     {
       accessorKey: "email",
-      header: "邮箱",
+      header: () => <div className="text-center">邮箱</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.original.email}</div>
+      ),
     },
     {
       accessorKey: "role",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-            }}
-          >
-            身份
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
+      header: () => <div className="text-center">身份</div>,
+      cell: ({ row }) => <div className="text-center">{row.original.role}</div>,
     },
     {
       accessorKey: "createdAt",
-      header: "创建时间",
+      header: () => <div className="text-center">创建时间</div>,
+      cell: ({ row }) => {
+        const createdAt = row.original.createdAt;
+        const formattedDate = format(
+          new Date(createdAt),
+          "yyyy-MM-dd HH:mm:ss"
+        );
+
+        return <div className="text-center">{formattedDate}</div>;
+      },
     },
     {
       id: "action",
+      header: () => <div className="text-center">操作</div>,
       cell: ({ row }) => {
         const user = row.original;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>操作</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => {
-                  setUpdateRoleDialogOpen(true);
-                  setCurrentUser(user);
-                }}
-              >
-                更改身份
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => {
-                  setDeleteUserDialogOpen(true);
-                  setCurrentUser(user);
-                }}
-              >
-                删除用户
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>操作</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setUpdateRoleDialogOpen(true);
+                    setCurrentUser(user);
+                  }}
+                >
+                  更改身份
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => {
+                    setDeleteUserDialogOpen(true);
+                    setCurrentUser(user);
+                  }}
+                >
+                  删除用户
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },
@@ -124,10 +124,17 @@ export default function UsersTable() {
 
   return (
     <>
-      <div className="mb-4">
-        <Button onClick={() => setCreateUserDialogOpen(true)}>添加用户</Button>
-      </div>
-      <DataTable columns={columns} data={data} />
+      <DataTable
+        columns={columns}
+        data={data}
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+        actions={
+          <Button onClick={() => setCreateUserDialogOpen(true)}>
+            添加用户
+          </Button>
+        }
+      />
       <UpdateUserRoleDialog
         user={currentUser}
         open={updateRoleDialogOpen}

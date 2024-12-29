@@ -5,4 +5,5 @@ export type UserType = {
   fullName: string;
   role: string;
   level: number;
+  createdAt: string;
 };

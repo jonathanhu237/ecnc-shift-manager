@@ -71,7 +71,10 @@ export default function UsersTable() {
         );
       },
     },
-    // TODO: add created_at column
+    {
+      accessorKey: "createdAt",
+      header: "创建时间",
+    },
     {
       id: "action",
       cell: ({ row }) => {
@@ -121,13 +124,8 @@ export default function UsersTable() {
 
   return (
     <>
-      <div className="flex items-center justify-end">
-        <Button
-          className="mb-4 mt-2"
-          onClick={() => setCreateUserDialogOpen(true)}
-        >
-          添加用户
-        </Button>
+      <div className="mb-4">
+        <Button onClick={() => setCreateUserDialogOpen(true)}>添加用户</Button>
       </div>
       <DataTable columns={columns} data={data} />
       <UpdateUserRoleDialog

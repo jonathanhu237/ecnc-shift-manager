@@ -71,6 +71,7 @@ export default function UsersTable() {
         );
       },
     },
+    // TODO: add created_at column
     {
       id: "action",
       cell: ({ row }) => {

@@ -14,12 +14,12 @@ type ScheduleTemplateShift struct {
 }
 
 type ScheduleTemplate struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Shifts      []*ScheduleTemplateShift
-	CreatedAt   time.Time `json:"createdAt"`
-	Version     int32     `json:"version"`
+	ID          int64                    `json:"id"`
+	Name        string                   `json:"name"`
+	Description string                   `json:"description"`
+	Shifts      []*ScheduleTemplateShift `json:"shifts,omitempty"`
+	CreatedAt   time.Time                `json:"createdAt"`
+	Version     int32                    `json:"version"`
 }
 
 func (m *Models) InsertScheduleTemplate(st *ScheduleTemplate) error {
@@ -148,4 +148,38 @@ func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
 	}
 
 	return st, nil
+}
+
+func (m *Models) SelectAllScheduleTemplateMeta() ([]*ScheduleTemplate, error) {
+	sts := make([]*ScheduleTemplate, 0)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	query := `
+		SELECT id, name, description, created_at, version
+		FROM schedule_templates
+	`
+	rows, err := m.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		st := &ScheduleTemplate{
+			Shifts: make([]*ScheduleTemplateShift, 0),
+		}
+		if err := rows.Scan(&st.ID, &st.Name, &st.Description, &st.CreatedAt, &st.Version); err != nil {
+			return nil, err
+		}
+
+		sts = append(sts, st)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return sts, nil
 }

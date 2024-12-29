@@ -124,3 +124,13 @@ func (h *Handlers) GetScheduleTemplates(w http.ResponseWriter, r *http.Request) 
 
 	h.successResponse(w, r, "班表模板获取成功", sts)
 }
+
+func (h *Handlers) GetAllScheduleTemplateMeta(w http.ResponseWriter, r *http.Request) {
+	sts, err := h.models.SelectAllScheduleTemplateMeta()
+	if err != nil {
+		h.internalServerError(w, r, err)
+		return
+	}
+
+	h.successResponse(w, r, "班表模板元数据获取成功", sts)
+}

@@ -150,3 +150,28 @@ func (h *Handlers) DeleteScheduleTemplate(w http.ResponseWriter, r *http.Request
 
 	h.successResponse(w, r, "班表模板删除成功", nil)
 }
+
+func (h *Handlers) UpdateScheduleTemplateDescription(w http.ResponseWriter, r *http.Request) {
+	var payload struct {
+		Description string `json:"description"`
+	}
+
+	if err := h.readJSON(r, &payload); err != nil {
+		h.errorResponse(w, r, err)
+		return
+	}
+
+	scheduleTemplateIDAsString := chi.URLParam(r, "scheduleTemplateID")
+	scheduleTemplateID, err := strconv.ParseInt(scheduleTemplateIDAsString, 10, 64)
+	if err != nil {
+		h.errorResponse(w, r, errors.New("班表模板 ID 非法"))
+		return
+	}
+
+	if err := h.models.UpdateScheduleTemplateDescription(scheduleTemplateID, payload.Description); err != nil {
+		h.internalServerError(w, r, err)
+		return
+	}
+
+	h.successResponse(w, r, "班表模板描述更新成功", nil)
+}

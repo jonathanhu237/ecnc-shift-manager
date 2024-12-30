@@ -68,29 +68,31 @@ export default function ScheduleTemplateMetaTable() {
         const ssm = row.original;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>操作</DropdownMenuLabel>
-              <DropdownMenuItem>查看详情</DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setCurrentssm(ssm);
-                  setUpdateDescriptionDialogOpen(true);
-                }}
-              >
-                更改描述
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
-                删除模板
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>操作</DropdownMenuLabel>
+                <DropdownMenuItem>查看详情</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentssm(ssm);
+                    setUpdateDescriptionDialogOpen(true);
+                  }}
+                >
+                  更改描述
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive">
+                  删除模板
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },

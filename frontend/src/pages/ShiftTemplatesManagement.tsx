@@ -1,4 +1,4 @@
-import ScheduleTemplateMetaTable from "@/components/ScheduleTemplateMetaTable";
+import ScheduleTemplateMetaTable from "@/components/table/ScheduleTemplateMetaTable";
 
 export default function ScheduleTemplatesManagement() {
   return <ScheduleTemplateMetaTable />;

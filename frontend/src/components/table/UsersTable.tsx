@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import CreateUserDialog from "./CreateUserDialog";
 import DataTable from "./DataTable";
 import DeleteUserDialog from "./DeleteUserDialog";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 import UpdateUserRoleDialog from "./UpdateUserRoleDialog";
 import { format } from "date-fns";
 

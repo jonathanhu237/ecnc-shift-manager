@@ -15,10 +15,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./ui/table";
-import { Button } from "./ui/button";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
-import { Input } from "./ui/input";
+import { Input } from "@/components/ui/input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

@@ -5,9 +5,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import CreateUserDialog from "./CreateUserDialog";
+import CreateUserDialog from "@/components/dialog/CreateUserDialog";
 import DataTable from "./DataTable";
-import DeleteUserDialog from "./DeleteUserDialog";
+import DeleteUserDialog from "@/components/dialog/DeleteUserDialog";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import UpdateUserRoleDialog from "./UpdateUserRoleDialog";
+import UpdateUserRoleDialog from "@/components/dialog/UpdateUserRoleDialog";
 import { format } from "date-fns";
 
 export default function UsersTable() {

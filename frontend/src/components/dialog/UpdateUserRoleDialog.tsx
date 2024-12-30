@@ -5,19 +5,30 @@ import {
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "./ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, APIResponse } from "@/lib/api";
 import { AxiosResponse } from "axios";
 import { toast } from "sonner";
-import PendingButton from "./PendingButton";
+import PendingButton from "@/components/PendingButton";
 
 interface Props {
   user: UserType | null;

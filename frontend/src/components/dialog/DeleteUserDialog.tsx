@@ -3,14 +3,14 @@ import { UserType } from "@/types/user";
 import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import PendingButton from "./PendingButton";
+import PendingButton from "@/components/PendingButton";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
-} from "./ui/alert-dialog";
-import { Button } from "./ui/button";
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   user: UserType | null;

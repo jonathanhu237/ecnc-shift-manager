@@ -15,7 +15,7 @@ import {
 } from "../ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 import { useState } from "react";
-import UpdatePasswordDialog from "../UpdatePasswordDialog";
+import UpdatePasswordDialog from "@/components/dialog/UpdatePasswordDialog";
 
 export default function NavUser() {
   const queryClient = useQueryClient();

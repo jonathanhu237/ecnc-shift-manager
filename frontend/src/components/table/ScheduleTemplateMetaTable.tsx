@@ -3,7 +3,7 @@ import { ScheduleTemplateMetaType } from "@/types/schedule-template";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import DataTable from "./DataTable";
+import DataTable from "@/components/table/DataTable";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import UpdateTemplateDescriptionDialog from "@/components/dialog/UpdateTemplateDescriptionDialog";
 
 export default function ScheduleTemplateMetaTable() {
   const { data, isPending, isError, error } = useQuery({
@@ -26,6 +27,11 @@ export default function ScheduleTemplateMetaTable() {
         .then((res) => res.data.data),
   });
   const [globalFilter, setGlobalFilter] = useState("");
+  const [updateDescriptionDialogOpen, setUpdateDescriptionDialogOpen] =
+    useState(false);
+  const [currentssm, setCurrentssm] = useState<
+    ScheduleTemplateMetaType | undefined
+  >(undefined);
 
   const columns: ColumnDef<ScheduleTemplateMetaType>[] = [
     {
@@ -58,7 +64,9 @@ export default function ScheduleTemplateMetaTable() {
     {
       id: "action",
       header: () => <div className="text-center">操作</div>,
-      cell: () => {
+      cell: ({ row }) => {
+        const ssm = row.original;
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -69,7 +77,14 @@ export default function ScheduleTemplateMetaTable() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>操作</DropdownMenuLabel>
               <DropdownMenuItem>查看详情</DropdownMenuItem>
-              <DropdownMenuItem>更改描述</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setCurrentssm(ssm);
+                  setUpdateDescriptionDialogOpen(true);
+                }}
+              >
+                更改描述
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive">
                 删除模板
@@ -97,6 +112,11 @@ export default function ScheduleTemplateMetaTable() {
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
         actions={<Button>创建班表模板</Button>}
+      />
+      <UpdateTemplateDescriptionDialog
+        open={updateDescriptionDialogOpen}
+        onOpenChange={setUpdateDescriptionDialogOpen}
+        ssm={currentssm}
       />
     </>
   );

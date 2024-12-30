@@ -6,6 +6,18 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          "lucida grande",
+          "lucida sans unicode",
+          lucida,
+          helvetica,
+          "Hiragino Sans GB",
+          "Microsoft YaHei",
+          "WenQuanYi Micro Hei",
+          sans - serif,
+        ],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

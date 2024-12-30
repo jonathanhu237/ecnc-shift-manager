@@ -88,6 +88,8 @@
 
 @layer base {
   * {
-    @apply font-['LXGWWenKai'];
+    @apply font-sans;
+    /* if you need to apply LXGWWenkai, uncomment following code */
+    /* @apply font-['LXGWWenKai']; */
   }
 }

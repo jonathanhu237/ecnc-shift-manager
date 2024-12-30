@@ -168,10 +168,16 @@ func (h *Handlers) UpdateScheduleTemplateDescription(w http.ResponseWriter, r *h
 		return
 	}
 
-	if err := h.models.UpdateScheduleTemplateDescription(scheduleTemplateID, payload.Description); err != nil {
-		h.internalServerError(w, r, err)
-		return
+	st, err := h.models.UpdateScheduleTemplateDescription(scheduleTemplateID, payload.Description)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			h.errorResponse(w, r, errors.New("班表模板不存在"))
+			return
+		} else {
+			h.internalServerError(w, r, err)
+			return
+		}
 	}
 
-	h.successResponse(w, r, "班表模板描述更新成功", nil)
+	h.successResponse(w, r, "班表模板描述更新成功", st)
 }

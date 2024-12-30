@@ -208,29 +208,24 @@ func (m *Models) DeleteScheduleTemplate(id int64) error {
 	return nil
 }
 
-func (m *Models) UpdateScheduleTemplateDescription(id int64, description string) error {
+func (m *Models) UpdateScheduleTemplateDescription(id int64, description string) (*ScheduleTemplate, error) {
 	query := `
 		UPDATE schedule_templates
 		SET description = $1
 		WHERE id = $2
+		RETURNING name, created_at, version
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, err := m.db.ExecContext(ctx, query, description, id)
-	if err != nil {
-		return err
+	st := &ScheduleTemplate{
+		ID:          id,
+		Description: description,
+	}
+	if err := m.db.QueryRowContext(ctx, query, description, id).Scan(&st.Name, &st.CreatedAt, &st.Version); err != nil {
+		return nil, err
 	}
 
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows <= 0 {
-		return sql.ErrNoRows
-	}
-
-	return nil
+	return st, nil
 }

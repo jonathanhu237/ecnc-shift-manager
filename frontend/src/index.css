@@ -86,10 +86,9 @@
   src: url("/fonts/LXGWWenKai.ttf") format("truetype");
 }
 
-@layer base {
+/* if you need to apply LXGWWenkai, uncomment following code */
+/* @layer base {
   * {
-    @apply font-sans;
-    /* if you need to apply LXGWWenkai, uncomment following code */
-    /* @apply font-['LXGWWenKai']; */
+    @apply font-['LXGWWenKai'];
   }
-}
+} */

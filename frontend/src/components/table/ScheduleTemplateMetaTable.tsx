@@ -17,6 +17,7 @@ import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import UpdateTemplateDescriptionDialog from "@/components/dialog/UpdateTemplateDescriptionDialog";
+import DeleteScheduleTemplateDialog from "@/components/dialog/DeleteScheduleTemplateDialog";
 
 export default function ScheduleTemplateMetaTable() {
   const { data, isPending, isError, error } = useQuery({
@@ -28,6 +29,8 @@ export default function ScheduleTemplateMetaTable() {
   });
   const [globalFilter, setGlobalFilter] = useState("");
   const [updateDescriptionDialogOpen, setUpdateDescriptionDialogOpen] =
+    useState(false);
+  const [deleteTemplateDialogOpen, setDeleteTemplateDialogOpen] =
     useState(false);
   const [currentssm, setCurrentssm] = useState<
     ScheduleTemplateMetaType | undefined
@@ -87,7 +90,13 @@ export default function ScheduleTemplateMetaTable() {
                   更改描述
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => {
+                    setCurrentssm(ssm);
+                    setDeleteTemplateDialogOpen(true);
+                  }}
+                >
                   删除模板
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -118,6 +127,11 @@ export default function ScheduleTemplateMetaTable() {
       <UpdateTemplateDescriptionDialog
         open={updateDescriptionDialogOpen}
         onOpenChange={setUpdateDescriptionDialogOpen}
+        ssm={currentssm}
+      />
+      <DeleteScheduleTemplateDialog
+        open={deleteTemplateDialogOpen}
+        onOpenChange={setDeleteTemplateDialogOpen}
         ssm={currentssm}
       />
     </>

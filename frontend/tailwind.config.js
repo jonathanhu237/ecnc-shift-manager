@@ -10,12 +10,12 @@ export default {
         sans: [
           "lucida grande",
           "lucida sans unicode",
-          lucida,
-          helvetica,
+          "lucida",
+          "helvetica",
           "Hiragino Sans GB",
           "Microsoft YaHei",
           "WenQuanYi Micro Hei",
-          sans - serif,
+          "sans-serif",
         ],
       },
       borderRadius: {

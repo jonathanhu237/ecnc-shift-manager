@@ -19,11 +19,11 @@ func IsValidRole(role string) bool {
 
 func ValidateScheduleTemplate(st *models.ScheduleTemplate) error {
 	for i := 0; i < len(st.Shifts); i++ {
-		startTime, err := time.Parse("15:04", st.Shifts[i].StartTime)
+		startTime, err := time.Parse("15:04:05", st.Shifts[i].StartTime)
 		if err != nil {
 			return fmt.Errorf("班次 %d 的开始时间格式无效", i)
 		}
-		endTime, err := time.Parse("15:04", st.Shifts[i].EndTime)
+		endTime, err := time.Parse("15:04:05", st.Shifts[i].EndTime)
 		if err != nil {
 			return fmt.Errorf("班次 %d 的结束时间格式无效", i)
 		}
@@ -34,10 +34,10 @@ func ValidateScheduleTemplate(st *models.ScheduleTemplate) error {
 
 	for i := 0; i < len(st.Shifts); i++ {
 		for j := i + 1; j < len(st.Shifts); j++ {
-			iEndTime, _ := time.Parse("15:04", st.Shifts[i].EndTime)
-			jStartTime, _ := time.Parse("15:04", st.Shifts[j].StartTime)
-			iStartTime, _ := time.Parse("15:04", st.Shifts[i].StartTime)
-			jEndTime, _ := time.Parse("15:04", st.Shifts[j].EndTime)
+			iEndTime, _ := time.Parse("15:04:05", st.Shifts[i].EndTime)
+			jStartTime, _ := time.Parse("15:04:05", st.Shifts[j].StartTime)
+			iStartTime, _ := time.Parse("15:04:05", st.Shifts[i].StartTime)
+			jEndTime, _ := time.Parse("15:04:05", st.Shifts[j].EndTime)
 
 			if !(iEndTime.Before(jStartTime) ||
 				iEndTime.Equal(jStartTime) ||

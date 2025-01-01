@@ -12,6 +12,7 @@ import LoginPage from "./pages/LoginPage.tsx";
 import UsersManagementPage from "./pages/UsersManagementPage.tsx";
 import BlackCoreGuard from "./components/auth/BlackCoreGuard.tsx";
 import ScheduleTemplatesManagement from "./pages/ShiftTemplatesManagement.tsx";
+import CreateScheduleTemplate from "./pages/CreateScheduleTemplate.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,14 @@ createRoot(document.getElementById("root")!).render(
               element={
                 <BlackCoreGuard>
                   <ScheduleTemplatesManagement />
+                </BlackCoreGuard>
+              }
+            />
+            <Route
+              path="create-schedule-template"
+              element={
+                <BlackCoreGuard>
+                  <CreateScheduleTemplate />
                 </BlackCoreGuard>
               }
             />

@@ -1,10 +1,16 @@
+import DeleteScheduleTemplateDialog from "@/components/dialog/DeleteScheduleTemplateDialog";
+import UpdateTemplateDescriptionDialog from "@/components/dialog/UpdateTemplateDescriptionDialog";
+import DataTable from "@/components/table/DataTable";
+import { Button } from "@/components/ui/button";
 import { api, APIResponse } from "@/lib/api";
 import { ScheduleTemplateMetaType } from "@/types/schedule-template";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import DataTable from "@/components/table/DataTable";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-import { useState } from "react";
-import { format } from "date-fns";
-import UpdateTemplateDescriptionDialog from "@/components/dialog/UpdateTemplateDescriptionDialog";
-import DeleteScheduleTemplateDialog from "@/components/dialog/DeleteScheduleTemplateDialog";
 
 export default function ScheduleTemplateMetaTable() {
   const { data, isPending, isError, error } = useQuery({
@@ -107,6 +108,8 @@ export default function ScheduleTemplateMetaTable() {
     },
   ];
 
+  const navigate = useNavigate();
+
   if (isPending) {
     return null;
   }
@@ -122,7 +125,11 @@ export default function ScheduleTemplateMetaTable() {
         data={data}
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
-        actions={<Button>创建班表模板</Button>}
+        actions={
+          <Button onClick={() => navigate("/create-schedule-template")}>
+            创建班表模板
+          </Button>
+        }
       />
       <UpdateTemplateDescriptionDialog
         open={updateDescriptionDialogOpen}

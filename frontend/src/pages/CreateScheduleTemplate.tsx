@@ -28,45 +28,53 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScheduleTemplateShiftType } from "@/types/schedule-template";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CirclePlusIcon, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
+import { toast } from "sonner";
 import { z } from "zod";
 
 type ShiftMetaType = {
+  id: number;
   key: string;
   name: string;
 };
 
 const shiftMeta: ShiftMetaType[] = [
   {
+    id: 1,
     key: "mon",
     name: "周一",
   },
   {
+    id: 2,
     key: "tue",
     name: "周二",
   },
   {
+    id: 3,
     key: "wed",
     name: "周三",
   },
   {
+    id: 4,
     key: "thu",
     name: "周四",
   },
   {
+    id: 5,
     key: "fri",
     name: "周五",
   },
   {
+    id: 6,
     key: "sun",
     name: "周六",
   },
   {
+    id: 7,
     key: "sat",
     name: "周日",
   },
@@ -90,6 +98,16 @@ export default function CreateScheduleTemplate() {
       shifts: [],
     },
   });
+
+  const onSubmit = (data: FormSchemaType) => {
+    toast("提交班表模板", {
+      description: (
+        <pre>
+          <code>{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+    });
+  };
 
   return (
     <>
@@ -118,7 +136,10 @@ export default function CreateScheduleTemplate() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form className="space-y-4">
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+              >
                 {/* the name of the template */}
                 <FormField
                   name="name"
@@ -192,19 +213,44 @@ export default function CreateScheduleTemplate() {
                                           {shift.requiredAssistants}名助理)
                                         </span>
                                         <div className="flex items-center gap-2">
-                                          <Switch />
+                                          <Switch
+                                            checked={field.value.some(
+                                              (shiftField) =>
+                                                shift === shiftField &&
+                                                shift.applicableDays.includes(
+                                                  item.id
+                                                )
+                                            )}
+                                            onCheckedChange={(checked) => {
+                                              field.onChange(
+                                                field.value.map((s) =>
+                                                  s === shift
+                                                    ? {
+                                                        ...s,
+                                                        applicableDays: checked
+                                                          ? [
+                                                              ...s.applicableDays,
+                                                              item.id,
+                                                            ]
+                                                          : s.applicableDays.filter(
+                                                              (day) =>
+                                                                day !== item.id
+                                                            ),
+                                                      }
+                                                    : s
+                                                )
+                                              );
+                                            }}
+                                          />
                                           <Button
                                             variant="ghost"
                                             type="button"
                                             size="icon"
                                             onClick={() => {
                                               field.onChange(
-                                                (
-                                                  prev: ScheduleTemplateShiftType[]
-                                                ) =>
-                                                  prev.filter(
-                                                    (item) => item !== shift
-                                                  )
+                                                field.value.filter(
+                                                  (s) => s !== shift
+                                                )
                                               );
                                             }}
                                           >
@@ -219,11 +265,13 @@ export default function CreateScheduleTemplate() {
                             ))}
                           </Tabs>
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                       {/* dialog for creating shift */}
                       <CreateScheduleTemplateDialog
                         open={createShiftDialogOpen}
                         onOpenChange={setCreateShiftDialogOpen}
+                        scheduleTemplateShifts={field.value}
                         setScheduleTemplateShifts={field.onChange}
                       />
                     </>

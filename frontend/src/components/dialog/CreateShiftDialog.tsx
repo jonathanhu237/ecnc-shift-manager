@@ -16,8 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { checkScheduleTemplateShiftConflict } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isBefore, isEqual } from "date-fns";
+import { isBefore } from "date-fns";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,16 +26,19 @@ import { z } from "zod";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  setScheduleTemplateShifts: React.Dispatch<
-    React.SetStateAction<ScheduleTemplateFormSchemaType[]>
-  >;
+  scheduleTemplateShifts: ScheduleTemplateFormSchemaType[];
+  setScheduleTemplateShifts: (sts: ScheduleTemplateFormSchemaType[]) => void;
 }
 
 export const ScheduleTemplateFormSchema = z
   .object({
     startTime: z.string(),
     endTime: z.string(),
-    requiredAssistants: z.number().int().positive("请输入有效的助理人数"),
+    requiredAssistants: z
+      .number({ message: "请输入所需要的助理人数" })
+      .int()
+      .positive("请输入有效的助理人数"),
+    applicableDays: z.array(z.number()).default([]), // if you don't add default([]) here, zod will not work
   })
   .refine(
     (data) => {
@@ -55,6 +59,7 @@ export type ScheduleTemplateFormSchemaType = z.infer<
 export default function CreateScheduleTemplateDialog({
   open,
   onOpenChange,
+  scheduleTemplateShifts,
   setScheduleTemplateShifts,
 }: Props) {
   const form = useForm<ScheduleTemplateFormSchemaType>({
@@ -63,43 +68,20 @@ export default function CreateScheduleTemplateDialog({
       startTime: "00:00:00",
       endTime: "00:00:00",
       requiredAssistants: 0,
+      applicableDays: [],
     },
   });
 
   const onSubmit = (data: ScheduleTemplateFormSchemaType) => {
-    let isConflict = false;
-    setScheduleTemplateShifts((prev) => {
-      isConflict = prev.some((shift) => {
-        const shiftStartTimeDate = new Date(`1970-01-01T${shift.startTime}`);
-        const shiftEndTimeDate = new Date(`1970-01-01T${shift.endTime}`);
-        const dataStartTimeDate = new Date(`1970-01-01T${data.startTime}`);
-        const dataEndTimeDate = new Date(`1970-01-01T${data.endTime}`);
-        return !(
-          (isBefore(shiftEndTimeDate, dataStartTimeDate) &&
-            isEqual(shiftEndTimeDate, dataStartTimeDate)) ||
-          (isBefore(dataEndTimeDate, shiftStartTimeDate) &&
-            isEqual(dataEndTimeDate, shiftStartTimeDate))
-        );
-      });
-
-      if (isConflict) {
-        return prev;
-      }
-
-      return [...prev, data].sort((s1, s2) => {
-        const s1StartTimeDate = new Date(`1970-01-01T${s1.startTime}`);
-        const s2StartTimeDate = new Date(`1970-01-01T${s2.startTime}`);
-        if (isBefore(s1StartTimeDate, s2StartTimeDate)) return -1;
-        return 1;
-      });
-    });
-    if (isConflict) {
+    if (checkScheduleTemplateShiftConflict(scheduleTemplateShifts, data)) {
       toast.error("新班次与已有班次的时间冲突");
-    } else {
-      toast.success("创建班次成功");
-      onOpenChange(false);
-      form.reset();
+      return;
     }
+
+    setScheduleTemplateShifts([...scheduleTemplateShifts, data]);
+    toast.success("创建班次成功");
+    onOpenChange(false);
+    form.reset();
   };
 
   return (

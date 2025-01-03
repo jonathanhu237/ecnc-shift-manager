@@ -3,6 +3,7 @@ export type ScheduleTemplateMetaType = {
   name: string;
   description: string;
   createdAt: string;
+  version: number;
 };
 
 export type ScheduleTemplateShiftType = {
@@ -11,4 +12,8 @@ export type ScheduleTemplateShiftType = {
   endTime: string;
   requiredAssistants: number;
   applicableDays: number[];
+};
+
+export type ScheduleTemplateType = ScheduleTemplateMetaType & {
+  shifts: ScheduleTemplateShiftType[];
 };

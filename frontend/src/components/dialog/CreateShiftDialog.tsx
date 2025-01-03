@@ -94,7 +94,7 @@ export default function CreateScheduleTemplateDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <Form {...form}>
-          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+          <form className="space-y-4">
             <FormField
               control={form.control}
               name="startTime"
@@ -187,7 +187,9 @@ export default function CreateScheduleTemplateDialog({
               >
                 取消
               </Button>
-              <Button type="submit">添加</Button>
+              <Button type="button" onClick={form.handleSubmit(onSubmit)}>
+                添加
+              </Button>
             </div>
           </form>
         </Form>

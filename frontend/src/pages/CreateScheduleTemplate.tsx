@@ -1,6 +1,7 @@
 import CreateScheduleTemplateDialog, {
   ScheduleTemplateFormSchema,
 } from "@/components/dialog/CreateShiftDialog";
+import PendingButton from "@/components/PendingButton";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,11 +29,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api, APIResponse } from "@/lib/api";
+import {
+  ScheduleTemplateMetaType,
+  ScheduleTemplateType,
+} from "@/types/schedule-template";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CirclePlusIcon, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -99,14 +106,46 @@ export default function CreateScheduleTemplate() {
     },
   });
 
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const mutation = useMutation<
+    APIResponse<ScheduleTemplateType>,
+    Error,
+    FormSchemaType
+  >({
+    mutationFn: (data: FormSchemaType) =>
+      api.post("/schedule-templates", data).then((res) => res.data),
+    onSuccess: (res) => {
+      // set query cache
+      queryClient.setQueryData(["schedule-template", res.data.id], res.data);
+      queryClient.setQueryData(
+        ["schedule-template-meta"],
+        (prev: ScheduleTemplateMetaType[]) => [
+          ...prev,
+          {
+            id: res.data.id,
+            name: res.data.name,
+            description: res.data.description,
+            createdAt: res.data.createdAt,
+            version: res.data.version,
+          },
+        ]
+      );
+      // toast
+      toast.success(res.message);
+      // reset form
+      form.reset();
+      // navigate to the table
+      navigate("/shift-templates-management", { replace: true });
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
   const onSubmit = (data: FormSchemaType) => {
-    toast("提交班表模板", {
-      description: (
-        <pre>
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    mutation.mutate(data);
   };
 
   return (
@@ -136,10 +175,7 @@ export default function CreateScheduleTemplate() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form
-                className="space-y-4"
-                onSubmit={form.handleSubmit(onSubmit)}
-              >
+              <form className="space-y-4">
                 {/* the name of the template */}
                 <FormField
                   name="name"
@@ -148,7 +184,11 @@ export default function CreateScheduleTemplate() {
                     <FormItem>
                       <FormLabel>模板名称</FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入模板名称" {...field} />
+                        <Input
+                          placeholder="请输入模板名称"
+                          {...field}
+                          disabled={mutation.isPending}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -165,6 +205,7 @@ export default function CreateScheduleTemplate() {
                         <Input
                           placeholder="（可选）请输入模板描述"
                           {...field}
+                          disabled={mutation.isPending}
                         />
                       </FormControl>
                     </FormItem>
@@ -185,6 +226,7 @@ export default function CreateScheduleTemplate() {
                             type="button"
                             size="icon"
                             onClick={() => setCreateShiftDialogOpen(true)}
+                            disabled={mutation.isPending}
                           >
                             <CirclePlusIcon />
                           </Button>
@@ -214,6 +256,7 @@ export default function CreateScheduleTemplate() {
                                         </span>
                                         <div className="flex items-center gap-2">
                                           <Switch
+                                            disabled={mutation.isPending}
                                             checked={field.value.some(
                                               (shiftField) =>
                                                 shift === shiftField &&
@@ -253,6 +296,7 @@ export default function CreateScheduleTemplate() {
                                                 )
                                               );
                                             }}
+                                            disabled={mutation.isPending}
                                           >
                                             <Trash2 />
                                           </Button>
@@ -279,7 +323,13 @@ export default function CreateScheduleTemplate() {
                 />
                 {/* button */}
                 <div className="flex justify-end">
-                  <Button>提交</Button>
+                  {mutation.isPending ? (
+                    <PendingButton />
+                  ) : (
+                    <Button type="button" onClick={form.handleSubmit(onSubmit)}>
+                      提交
+                    </Button>
+                  )}
                 </div>
               </form>
             </Form>

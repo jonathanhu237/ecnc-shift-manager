@@ -9,6 +9,7 @@
     "pgconn",
     "pgtype",
     "pgxpool",
+    "sonner",
     "sslmode",
     "stdlib"
   ]

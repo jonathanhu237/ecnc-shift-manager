@@ -126,7 +126,9 @@ export default function ScheduleTemplateMetaTable() {
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
         actions={
-          <Button onClick={() => navigate("/create-schedule-template")}>
+          <Button
+            onClick={() => navigate("/shift-templates-management/create")}
+          >
             创建班表模板
           </Button>
         }

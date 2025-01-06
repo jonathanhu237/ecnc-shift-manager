@@ -4,18 +4,20 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ScheduleTemplateShift struct {
-	ID                 int64   `json:"id"`
-	StartTime          string  `json:"startTime"`
-	EndTime            string  `json:"endTime"`
-	RequiredAssistants int32   `json:"requiredAssistants"`
-	ApplicableDays     []int32 `json:"applicableDays"`
+	ID                 uuid.UUID `json:"id"`
+	StartTime          string    `json:"startTime"`
+	EndTime            string    `json:"endTime"`
+	RequiredAssistants int32     `json:"requiredAssistants"`
+	ApplicableDays     []int32   `json:"applicableDays"`
 }
 
 type ScheduleTemplate struct {
-	ID          int64                    `json:"id"`
+	ID          uuid.UUID                `json:"id"`
 	Name        string                   `json:"name"`
 	Description string                   `json:"description"`
 	Shifts      []*ScheduleTemplateShift `json:"shifts,omitempty"`
@@ -78,7 +80,7 @@ func (m *Models) InsertScheduleTemplate(st *ScheduleTemplate) error {
 	return tx.Commit()
 }
 
-func (m *Models) SelectScheduleTemplate(id int64) (*ScheduleTemplate, error) {
+func (m *Models) SelectScheduleTemplate(id uuid.UUID) (*ScheduleTemplate, error) {
 	st := &ScheduleTemplate{
 		ID:     id,
 		Shifts: make([]*ScheduleTemplateShift, 0),
@@ -208,7 +210,7 @@ func (m *Models) DeleteScheduleTemplate(id int64) error {
 	return nil
 }
 
-func (m *Models) UpdateScheduleTemplateDescription(id int64, description string) (*ScheduleTemplate, error) {
+func (m *Models) UpdateScheduleTemplateDescription(id uuid.UUID, description string) (*ScheduleTemplate, error) {
 	query := `
 		UPDATE schedule_templates
 		SET description = $1

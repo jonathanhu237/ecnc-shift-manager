@@ -1,1 +1,3 @@
 DROP TABLE IF EXISTS roles;
+
+DROP EXTENSION IF EXISTS "uuid-ossp";

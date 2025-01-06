@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/utils"
@@ -105,7 +106,7 @@ func (h *Handlers) CreateScheduleTemplate(w http.ResponseWriter, r *http.Request
 
 func (h *Handlers) GetScheduleTemplates(w http.ResponseWriter, r *http.Request) {
 	scheduleTemplateIDAsString := chi.URLParam(r, "scheduleTemplateID")
-	scheduleTemplateID, err := strconv.ParseInt(scheduleTemplateIDAsString, 10, 64)
+	scheduleTemplateID, err := uuid.Parse(scheduleTemplateIDAsString)
 	if err != nil {
 		h.errorResponse(w, r, errors.New("班表模板 ID 非法"))
 		return
@@ -162,7 +163,7 @@ func (h *Handlers) UpdateScheduleTemplateDescription(w http.ResponseWriter, r *h
 	}
 
 	scheduleTemplateIDAsString := chi.URLParam(r, "scheduleTemplateID")
-	scheduleTemplateID, err := strconv.ParseInt(scheduleTemplateIDAsString, 10, 64)
+	scheduleTemplateID, err := uuid.Parse(scheduleTemplateIDAsString)
 	if err != nil {
 		h.errorResponse(w, r, errors.New("班表模板 ID 非法"))
 		return

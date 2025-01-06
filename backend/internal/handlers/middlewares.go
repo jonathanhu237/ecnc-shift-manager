@@ -6,11 +6,11 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jonathanhu237/ecnc-shift-manager/backend/internal/models"
 )
 
@@ -100,7 +100,7 @@ func (h *Handlers) AuthGuardMiddleware(levelRequired int32) func(http.Handler) h
 func (h *Handlers) GetUserMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userIDParam := chi.URLParam(r, "userID")
-		userID, err := strconv.ParseInt(userIDParam, 10, 64)
+		userID, err := uuid.Parse(userIDParam)
 		if err != nil {
 			h.errorResponse(w, r, errors.New("无效的用户ID"))
 			return

@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID           int64     `json:"id"`
+	ID           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`
 	PasswordHash string    `json:"-"`
 	Email        string    `json:"email"`
@@ -73,7 +75,7 @@ func (m *Models) SelectUserByUsername(username string) (*User, error) {
 	return user, nil
 }
 
-func (m *Models) SelectUserByID(userID int64) (*User, error) {
+func (m *Models) SelectUserByID(userID uuid.UUID) (*User, error) {
 	user := &User{ID: userID}
 
 	query := `
@@ -198,7 +200,7 @@ func (m *Models) SelectAllUsers() ([]*User, error) {
 	return users, nil
 }
 
-func (m *Models) DeleteUser(userID int64) error {
+func (m *Models) DeleteUser(userID uuid.UUID) error {
 	query := `DELETE FROM users WHERE id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

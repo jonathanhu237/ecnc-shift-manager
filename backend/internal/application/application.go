@@ -92,7 +92,7 @@ func (app *Application) Run() {
 	app.logger.Info("email client established")
 
 	/****************************************************************
-		perform mail sender
+		perform health check
 	****************************************************************/
 	if err := app.healthCheck(); err != nil {
 		app.logger.Error(err.Error())
@@ -101,7 +101,7 @@ func (app *Application) Run() {
 	app.logger.Info("health check completed")
 
 	/****************************************************************
-		establish mail sender
+		start the server
 	****************************************************************/
 	app.handler = handlers.New(app.config, app.logger, app.models, ch)
 	app.server = &http.Server{

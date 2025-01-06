@@ -7,12 +7,12 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import "./index.css";
 import AuthLayout from "@/layouts/AuthLayout.tsx";
 import DashboardLayout from "@/layouts/DashboardLayout.tsx";
-import DashboardIndex from "@/pages/DashboardIndex.tsx";
+import DashboardIndexPage from "@/pages/DashboardIndexPage";
 import LoginPage from "@/pages/LoginPage.tsx";
 import UsersManagementPage from "@/pages/UsersManagementPage.tsx";
-import ScheduleTemplatesManagement from "@/pages/ShiftTemplatesManagement.tsx";
-import CreateScheduleTemplate from "@/pages/CreateScheduleTemplate.tsx";
-import ScheduleTemplateDetails from "@/pages/ScheduleTemplateDetails.tsx";
+import ScheduleTemplatesManagementPage from "@/pages/ShiftTemplatesManagementPage";
+import CreateScheduleTemplatePage from "@/pages/CreateScheduleTemplatePage";
+import ScheduleTemplateDetailsPage from "@/pages/ScheduleTemplateDetailsPage";
 import BlackCoreGuardLayout from "@/layouts/BlackCoreGuardLayout";
 
 const queryClient = new QueryClient({
@@ -30,17 +30,17 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<DashboardLayout />}>
-            <Route index element={<DashboardIndex />} />
+            <Route index element={<DashboardIndexPage />} />
             <Route path="users-management" element={<BlackCoreGuardLayout />}>
               <Route index element={<UsersManagementPage />} />
             </Route>
             <Route
-              path="shift-templates-management"
+              path="schedule-templates-management"
               element={<BlackCoreGuardLayout />}
             >
-              <Route index element={<ScheduleTemplatesManagement />} />
-              <Route path=":id" element={<ScheduleTemplateDetails />} />
-              <Route path="create" element={<CreateScheduleTemplate />} />
+              <Route index element={<ScheduleTemplatesManagementPage />} />
+              <Route path=":id" element={<ScheduleTemplateDetailsPage />} />
+              <Route path="create" element={<CreateScheduleTemplatePage />} />
             </Route>
           </Route>
           <Route path="auth" element={<AuthLayout />}>

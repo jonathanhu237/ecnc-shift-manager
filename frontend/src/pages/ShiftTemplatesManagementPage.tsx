@@ -6,7 +6,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 
-export default function ScheduleTemplatesManagement() {
+export default function ScheduleTemplatesManagementPage() {
   return (
     <>
       <Breadcrumb className="mb-4">

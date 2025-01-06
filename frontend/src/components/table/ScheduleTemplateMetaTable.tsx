@@ -33,9 +33,8 @@ export default function ScheduleTemplateMetaTable() {
     useState(false);
   const [deleteTemplateDialogOpen, setDeleteTemplateDialogOpen] =
     useState(false);
-  const [currentssm, setCurrentssm] = useState<
-    ScheduleTemplateMetaType | undefined
-  >(undefined);
+  const [currentScheduleTemplateMeta, setCurrentScheduleTemplateMeta] =
+    useState<ScheduleTemplateMetaType | undefined>(undefined);
 
   const columns: ColumnDef<ScheduleTemplateMetaType>[] = [
     {
@@ -69,7 +68,7 @@ export default function ScheduleTemplateMetaTable() {
       id: "action",
       header: () => <div className="text-center">操作</div>,
       cell: ({ row }) => {
-        const ssm = row.original;
+        const scheduleTemplateMeta = row.original;
 
         return (
           <div className="flex items-center justify-center">
@@ -81,10 +80,18 @@ export default function ScheduleTemplateMetaTable() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>操作</DropdownMenuLabel>
-                <DropdownMenuItem>查看详情</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigate(
+                      `/schedule-templates-management/${scheduleTemplateMeta.id}`
+                    )
+                  }
+                >
+                  查看详情
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    setCurrentssm(ssm);
+                    setCurrentScheduleTemplateMeta(scheduleTemplateMeta);
                     setUpdateDescriptionDialogOpen(true);
                   }}
                 >
@@ -94,7 +101,7 @@ export default function ScheduleTemplateMetaTable() {
                 <DropdownMenuItem
                   className="text-destructive"
                   onClick={() => {
-                    setCurrentssm(ssm);
+                    setCurrentScheduleTemplateMeta(scheduleTemplateMeta);
                     setDeleteTemplateDialogOpen(true);
                   }}
                 >
@@ -127,7 +134,7 @@ export default function ScheduleTemplateMetaTable() {
         setGlobalFilter={setGlobalFilter}
         actions={
           <Button
-            onClick={() => navigate("/shift-templates-management/create")}
+            onClick={() => navigate("/schedule-templates-management/create")}
           >
             创建班表模板
           </Button>
@@ -136,12 +143,12 @@ export default function ScheduleTemplateMetaTable() {
       <UpdateTemplateDescriptionDialog
         open={updateDescriptionDialogOpen}
         onOpenChange={setUpdateDescriptionDialogOpen}
-        ssm={currentssm}
+        ssm={currentScheduleTemplateMeta}
       />
       <DeleteScheduleTemplateDialog
         open={deleteTemplateDialogOpen}
         onOpenChange={setDeleteTemplateDialogOpen}
-        ssm={currentssm}
+        ssm={currentScheduleTemplateMeta}
       />
     </>
   );

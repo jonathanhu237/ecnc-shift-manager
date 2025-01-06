@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api, APIResponse } from "@/lib/api";
+import { DayOfWeek } from "@/lib/const";
 import {
   ScheduleTemplateMetaType,
   ScheduleTemplateType,
@@ -43,50 +44,6 @@ import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 
-type ShiftMetaType = {
-  id: number;
-  key: string;
-  name: string;
-};
-
-const shiftMeta: ShiftMetaType[] = [
-  {
-    id: 1,
-    key: "mon",
-    name: "周一",
-  },
-  {
-    id: 2,
-    key: "tue",
-    name: "周二",
-  },
-  {
-    id: 3,
-    key: "wed",
-    name: "周三",
-  },
-  {
-    id: 4,
-    key: "thu",
-    name: "周四",
-  },
-  {
-    id: 5,
-    key: "fri",
-    name: "周五",
-  },
-  {
-    id: 6,
-    key: "sun",
-    name: "周六",
-  },
-  {
-    id: 7,
-    key: "sat",
-    name: "周日",
-  },
-];
-
 const formSchema = z.object({
   name: z.string().min(1, "请输入模板名称"),
   description: z.string(),
@@ -95,7 +52,7 @@ const formSchema = z.object({
 
 type FormSchemaType = z.infer<typeof formSchema>;
 
-export default function CreateScheduleTemplate() {
+export default function CreateScheduleTemplatePage() {
   const [createShiftDialogOpen, setCreateShiftDialogOpen] = useState(false);
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
@@ -137,7 +94,7 @@ export default function CreateScheduleTemplate() {
       // reset form
       form.reset();
       // navigate to the table
-      navigate("/shift-templates-management", { replace: true });
+      navigate("/schedule-templates-management", { replace: true });
     },
     onError: (err) => {
       toast.error(err.message);
@@ -155,7 +112,7 @@ export default function CreateScheduleTemplate() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/shift-templates-management">班表模板管理</Link>
+              <Link to="/schedule-templates-management">班表模板管理</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -237,14 +194,14 @@ export default function CreateScheduleTemplate() {
                           <Tabs defaultValue="mon" className="mt-2">
                             {/* tabsList */}
                             <TabsList className="grid grid-cols-7">
-                              {shiftMeta.map((item) => (
+                              {DayOfWeek.map((item) => (
                                 <TabsTrigger key={item.key} value={item.key}>
                                   {item.name}
                                 </TabsTrigger>
                               ))}
                             </TabsList>
                             {/* tabsContent */}
-                            {shiftMeta.map((item) => (
+                            {DayOfWeek.map((item) => (
                               <TabsContent key={item.key} value={item.key}>
                                 <div className="space-y-2">
                                   {field.value.map((shift, index) => (

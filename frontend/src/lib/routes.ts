@@ -15,7 +15,7 @@ export const routes = [
   },
   {
     title: "班表模板管理",
-    url: "/shift-templates-management",
+    url: "/schedule-templates-management",
     icon: LayoutPanelTop,
     levelRequired: 3,
   },

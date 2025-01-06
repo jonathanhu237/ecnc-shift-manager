@@ -5,7 +5,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 
-export default function DashboardIndex() {
+export default function DashboardIndexPage() {
   return (
     <>
       <Breadcrumb className="mb-4">

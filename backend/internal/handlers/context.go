@@ -6,4 +6,5 @@ const (
 	requesterCtxKey     contextKey = "requester"
 	userCtxKey          contextKey = "user"
 	scheduleTemplateKey contextKey = "scheduleTemplate"
+	schedulePlanKey     contextKey = "schedulePlan"
 )

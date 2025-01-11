@@ -53,6 +53,10 @@ func (app *Application) routes() http.Handler {
 		r.Route("/schedule-plans", func(r chi.Router) {
 			r.Use(app.handler.AuthGuardMiddleware(blackCoreLevel))
 			r.Post("/", app.handler.CreateSchedulePlan)
+			r.Route("/{schedulePlanID}", func(r chi.Router) {
+				r.Use(app.handler.GetSchedulePlanMiddleware)
+				r.Get("/", app.handler.GetSchedulePlan)
+			})
 		})
 	})
 
